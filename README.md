@@ -1,20 +1,31 @@
 # Z-Image-Turbo Web UI
 
-一個基於 Flask 的美觀 Web 介面,用於 Z-Image-Turbo 文字轉圖片 AI 模型,專為 12GB VRAM 顯卡優化。
+> **v2.0.0** - 功能強大的 AI 圖片生成 Web 應用
+
+一個基於 Flask 的專業 Web 介面,用於 Z-Image-Turbo 文字轉圖片 AI 模型。
+專為 12GB VRAM 顯卡優化,支援批量生成、風格模板、標籤管理等進階功能。
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red.svg)
+![Version](https://img.shields.io/badge/version-2.0.0-green.svg)
 
-## ✨ 特色功能
+## ✨ 核心特色
 
+### 🚀 基礎功能
 - 🎨 **美觀的 Web 介面** - 現代化漸層設計,響應式布局
 - ⚡ **快速生成** - Sequential CPU Offload 優化,5-8 秒生成圖片
 - 💾 **記憶體優化** - 專為 12GB VRAM 設計,僅使用 ~0.7GB GPU 記憶體
 - 📜 **歷史記錄** - 自動保存生成歷史,可查看過去的提示詞和圖片
 - 📥 **一鍵下載** - 直接下載生成的圖片
 - 🔄 **即時預覽** - 側邊欄布局,提示詞和圖片同時可見
-- ⏰ **時間戳命名** - 自動以日期時間命名檔案
+
+### 🎯 進階功能 (v2.0 新增)
+- 🔢 **批量生成** - 一次生成最多 20 張圖片,ZIP 批量下載
+- 🎭 **風格模板** - 50+ 專業風格,7 大分類快速選擇
+- 📐 **尺寸預設** - 15+ 社群/列印尺寸,一鍵切換
+- 🏷️ **標籤系統** - 為圖片添加標籤,智能分類與過濾
+- 🎲 **Seed 控制** - 固定種子重現結果,便於調試優化
 
 ## 🖼️ 介面預覽
 
@@ -85,50 +96,93 @@ PORT = 5000               # 連接埠
 DEBUG = False             # 除錯模式
 ```
 
-## 💡 使用技巧
+## 💡 功能使用指南
 
-### VRAM 優化選項
+### 🔢 批量生成模式
+1. 點擊「批量生成」切換模式
+2. 每行輸入一個提示詞（最多 20 個）
+3. 點擊「開始批量生成」
+4. 查看網格結果
+5. 點擊「下載全部 (ZIP)」批量下載
 
-本專案針對 12GB VRAM 進行了優化,使用以下技術:
+### 🎭 使用風格模板
+1. 在「風格模板」下拉選單中選擇風格
+2. 系統自動將風格關鍵字組合到提示詞
+3. 50+ 風格可選：
+   - **藝術風格**: 水彩、油畫、素描、水墨、浮世繪、印象派
+   - **現代風格**: 賽博龐克、極簡、復古、蒸汽龐克、波普
+   - **動漫風格**: 吉卜力、日式、迪士尼、像素、漫畫
+   - **教學模板**: 科學圖解、歷史場景、文學插圖等
 
-1. **Sequential CPU Offload** - 將模型保存在 RAM 中,僅在需要時載入到 GPU
-2. **Attention Slicing** - 分批處理注意力計算,降低記憶體峰值
-3. **VAE Slicing** - 分批處理 VAE 解碼,進一步降低記憶體使用
+### 📐 選擇圖片尺寸
+1. 在「圖片尺寸」選單中選擇預設尺寸
+2. 社群媒體: Instagram、Facebook、YouTube 等
+3. 列印尺寸: A4、A5、明信片
+4. 標準尺寸: 512²、768²、1024²
 
-**記憶體使用情況:**
+### 🏷️ 標籤管理（後端已就緒）
+1. 為生成的圖片添加標籤
+2. 點擊標籤進行過濾
+3. 使用標籤雲快速分類
+4. API 端點: `/tags`, `/history/<id>/tags`, `/history/filter`
+
+### 🎲 Seed 控制（後端已就緒）
+1. 勾選「使用固定種子」
+2. 輸入 Seed 或點擊 🎲 生成隨機值
+3. 使用相同 Seed 和提示詞可重現結果
+4. API 端點: `/seed-control`
+
+### VRAM 優化
+
+本專案針對 12GB VRAM 進行了優化:
+
+1. **Sequential CPU Offload** - 模型保存在 RAM，按需載入 GPU
+2. **Attention Slicing** - 分批處理注意力計算
+3. **VAE Slicing** - 分批處理 VAE 解碼
+
+**性能指標:**
 - GPU 記憶體: ~0.7GB
 - 系統 RAM: ~20GB (模型快取)
 - 生成速度: 5-8 秒/張 (768×768, 9 steps)
+- 批量生成: 支援最多 20 張
 
 ### 提示詞建議
 
-- 使用中文或英文描述
-- 可以指定藝術風格 (如:水彩、油畫、賽博龐克等)
-- 詳細描述會得到更好的結果
-- 最多 500 個字元
-
-**範例提示詞:**
+**基礎提示詞:**
 ```
-以水彩風格,畫出一副淡水夕陽照
-賽博龐克風格的未來城市,霓虹燈閃爍
-油畫風格的貓咪肖像,溫暖的光線
+一隻貓咪坐在窗邊,溫暖的陽光
+未來城市的夜景,霓虹燈閃爍
+森林中的小木屋,秋天的氛圍
+```
+
+**配合風格模板:**
+```
+基礎提示詞: 一隻貓咪坐在窗邊
+選擇風格: 水彩畫
+→ 系統自動組合: 一隻貓咪坐在窗邊, watercolor style, soft colors, flowing
 ```
 
 ## 📁 專案結構
 
 ```
 zImageUI/
-├── app.py                      # Flask 主程式
+├── app.py                      # Flask 主程式 (已升級 v2.0)
 ├── config.py                   # 配置文件
+├── templates.json              # 風格模板資料庫 (50+ 風格)
+├── claude.md                   # 開發計劃文檔
+├── todo.md                     # 任務清單
+├── FEATURES.md                 # 功能詳細說明
 ├── imageGEN_Z.py              # 原始命令列版本
 ├── check_model_cache.py       # 模型快取檢查工具
 ├── templates/
-│   └── index.html             # 網頁介面
+│   └── index.html             # 網頁介面 (已升級 v2.0)
 ├── static/
 │   ├── css/
-│   │   └── style.css          # 樣式表
+│   │   └── style.css          # 樣式表 (已擴充)
 │   └── js/
-│       └── script.js          # JavaScript 程式
+│       ├── script.js          # 主 JavaScript (已升級)
+│       ├── templates.js       # 風格/尺寸選擇器 (新增)
+│       └── advanced.js        # 標籤/Seed 功能 (新增)
 ├── cache/                      # 模型快取目錄 (自動生成)
 ├── generated_images/           # 生成圖片儲存目錄 (自動生成)
 └── README.md                   # 本文件
@@ -152,12 +206,35 @@ python check_model_cache.py
 python imageGEN_Z.py
 ```
 
+## 📡 API 端點
+
+### 基礎功能
+- `POST /generate` - 單張圖片生成
+- `GET /history` - 獲取歷史記錄
+- `DELETE /history` - 清除歷史記錄
+- `GET /images/<filename>` - 圖片訪問
+
+### 批量功能
+- `POST /batch-generate` - 批量生成 (最多 20 張)
+- `POST /batch-download` - ZIP 批量下載
+
+### 模板與預設
+- `GET /templates` - 風格模板列表
+- `GET /size-presets` - 尺寸預設列表
+
+### 進階功能
+- `GET /tags` - 獲取所有標籤與使用統計
+- `POST /history/<id>/tags` - 更新歷史記錄標籤
+- `POST /history/filter` - 根據標籤過濾歷史
+- `POST /seed-control` - 使用固定 Seed 生成
+
+詳細 API 說明請參考 [FEATURES.md](FEATURES.md)
+
 ## 📚 相關文件
 
-- [12GB_VRAM_GUIDE.md](12GB_VRAM_GUIDE.md) - 12GB VRAM 優化指南
-- [VRAM_OPTIMIZATION.md](VRAM_OPTIMIZATION.md) - VRAM 優化詳細說明
-- [OPTIMIZATION_GUIDE.md](OPTIMIZATION_GUIDE.md) - 一般優化建議
-- [QUICK_START.md](QUICK_START.md) - 快速開始指南
+- [FEATURES.md](FEATURES.md) - 完整功能說明與使用指南
+- [claude.md](claude.md) - 開發計劃與技術架構
+- [todo.md](todo.md) - 任務追蹤清單
 
 ## ⚠️ 常見問題
 
@@ -171,7 +248,13 @@ A: 這是正常的!使用 Sequential CPU Offload 時,大部分模型保存在 RA
 A: 可以減少 `NUM_INFERENCE_STEPS` (但會降低品質) 或降低解析度。9 steps 是速度和品質的最佳平衡點。
 
 ### Q: 支援批量生成嗎?
-A: 目前版本不支援批量生成,但可以透過歷史記錄功能快速重複生成。
+A: v2.0 已支援批量生成!點擊「批量生成」模式,每行輸入一個提示詞,最多可一次生成 20 張圖片,並支援 ZIP 批量下載。
+
+### Q: 如何使用風格模板?
+A: 在介面上方選擇「風格模板」下拉選單,選擇您想要的風格,系統會自動將風格關鍵字組合到您的提示詞中。
+
+### Q: 如何重現相同的圖片?
+A: 使用 Seed 控制功能!勾選「使用固定種子」並輸入相同的 Seed 值和提示詞,就能重現完全相同的結果。
 
 ### Q: 如何更改輸出目錄?
 A: 編輯 `config.py` 中的 `OUTPUT_PATH` 設定。
@@ -183,6 +266,24 @@ A: 編輯 `config.py` 中的 `OUTPUT_PATH` 設定。
 ## 📄 授權
 
 本專案採用 MIT 授權條款 - 詳見 [LICENSE](LICENSE) 文件
+
+## 📝 更新日誌
+
+### v2.0.0 (2025-12-01)
+- ✅ 新增批量生成模式 (最多 20 張)
+- ✅ 新增 50+ 風格模板系統 (7 大分類)
+- ✅ 新增 15+ 尺寸預設 (社群/列印/標準)
+- ✅ 新增標籤管理系統 (後端完成)
+- ✅ 新增 Seed 固定控制 (後端完成)
+- ✅ 優化模組化代碼結構
+- ✅ 完善 API 端點 (12 個端點)
+
+### v1.0.0 (2025-11-30)
+- ✅ 基礎 Web 介面
+- ✅ 單張圖片生成
+- ✅ 歷史記錄功能
+- ✅ VRAM 優化 (Sequential CPU Offload)
+- ✅ 側邊欄布局設計
 
 ## 🙏 致謝
 

@@ -43,14 +43,16 @@ def save_history(history):
     except Exception as e:
         print(f"儲存歷史記錄失敗: {e}")
 
-def add_to_history(prompt, filename):
+def add_to_history(prompt, filename, tags=None):
     """新增歷史記錄"""
     history = load_history()
     history_item = {
+        'id': f"{int(datetime.now().timestamp() * 1000)}_{random.randint(1000, 9999)}",
         'prompt': prompt,
         'filename': filename,
         'timestamp': datetime.now().isoformat(),
-        'image_url': f'/images/{filename}'
+        'image_url': f'/images/{filename}',
+        'tags': tags if tags else []
     }
     history.insert(0, history_item)  # 最新的在前面
     # 限制歷史記錄數量 (最多50筆)
@@ -454,6 +456,164 @@ def get_size_presets():
             'height': config.IMAGE_HEIGHT
         }
     })
+
+@app.route('/tags', methods=['GET'])
+def get_all_tags():
+    """獲取所有使用過的標籤"""
+    try:
+        history = load_history()
+        all_tags = set()
+        tag_counts = {}
+
+        for item in history:
+            if 'tags' in item:
+                for tag in item['tags']:
+                    all_tags.add(tag)
+                    tag_counts[tag] = tag_counts.get(tag, 0) + 1
+
+        # 按使用頻率排序
+        sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
+
+        return jsonify({
+            'success': True,
+            'tags': [{'name': tag, 'count': count} for tag, count in sorted_tags]
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/history/<item_id>/tags', methods=['POST'])
+def update_tags(item_id):
+    """更新歷史記錄的標籤"""
+    try:
+        data = request.get_json()
+        tags = data.get('tags', [])
+
+        history = load_history()
+        updated = False
+
+        for item in history:
+            if item.get('id') == item_id:
+                item['tags'] = tags
+                updated = True
+                break
+
+        if updated:
+            save_history(history)
+            return jsonify({
+                'success': True,
+                'message': '標籤已更新'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': '找不到該記錄'
+            }), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/history/filter', methods=['POST'])
+def filter_history():
+    """根據標籤過濾歷史記錄"""
+    try:
+        data = request.get_json()
+        filter_tags = data.get('tags', [])
+
+        if not filter_tags:
+            # 沒有過濾條件，返回全部
+            history = load_history()
+        else:
+            history = load_history()
+            # 過濾包含任一標籤的記錄
+            filtered = [
+                item for item in history
+                if 'tags' in item and any(tag in item['tags'] for tag in filter_tags)
+            ]
+            history = filtered
+
+        return jsonify({
+            'success': True,
+            'history': history,
+            'count': len(history)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/seed-control', methods=['POST'])
+def generate_with_seed():
+    """使用指定種子生成圖片（用於重現結果）"""
+    try:
+        data = request.get_json()
+        prompt = data.get('prompt', '')
+        seed = data.get('seed')
+        style_keywords = data.get('style_keywords', '')
+        custom_width = data.get('width')
+        custom_height = data.get('height')
+
+        if not prompt:
+            return jsonify({'error': '請輸入提示詞'}), 400
+
+        if seed is None:
+            seed = random.randint(0, 2**32 - 1)
+
+        # 組合風格關鍵字
+        if style_keywords:
+            full_prompt = f"{prompt}, {style_keywords}"
+        else:
+            full_prompt = prompt
+
+        # 確定尺寸
+        width = custom_width if custom_width else config.IMAGE_WIDTH
+        height = custom_height if custom_height else config.IMAGE_HEIGHT
+
+        # 確保模型已載入
+        initialize_model()
+
+        # 生成前清理 GPU 快取
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        print(f"開始生成（固定種子）：{full_prompt}")
+        print(f"種子: {seed}")
+        print(f"解析度: {width}x{height}")
+
+        # 生成圖片
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        generator = torch.Generator(device=device).manual_seed(seed)
+
+        image = pipe(
+            prompt=full_prompt,
+            height=height,
+            width=width,
+            num_inference_steps=config.NUM_INFERENCE_STEPS,
+            guidance_scale=config.GUIDANCE_SCALE,
+            generator=generator,
+        ).images[0]
+
+        # 儲存
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"seed_{seed}_{timestamp}.png"
+        save_path = os.path.join(output_path, filename)
+        image.save(save_path)
+
+        # 添加到歷史
+        add_to_history(prompt, filename)
+
+        # 轉base64
+        buffered = BytesIO()
+        image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+
+        return jsonify({
+            'success': True,
+            'image': f"data:image/png;base64,{img_str}",
+            'filename': filename,
+            'prompt': prompt,
+            'seed': seed,
+            'message': f'圖片已生成（種子: {seed}）'
+        })
+    except Exception as e:
+        print(f"錯誤：{str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # 顯示配置資訊
