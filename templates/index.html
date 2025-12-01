@@ -51,6 +51,19 @@
                             </select>
                         </div>
 
+                        <!-- Seed 控制器 -->
+                        <div class="seed-control">
+                            <div class="seed-checkbox-wrapper">
+                                <input type="checkbox" id="useSeed" class="seed-checkbox">
+                                <label for="useSeed">使用固定種子（重現結果）</label>
+                            </div>
+                            <div class="seed-input-wrapper">
+                                <input type="number" id="seedInput" class="seed-input" placeholder="輸入 Seed 或點擊隨機" disabled min="0" max="4294967295">
+                                <button id="randomSeedBtn" class="random-seed-btn" title="生成隨機 Seed">🎲</button>
+                            </div>
+                            <p class="seed-hint">💡 使用相同 Seed 和提示詞可重現完全相同的結果</p>
+                        </div>
+
                         <label for="prompt">請輸入您的圖片描述提示詞</label>
                         <textarea
                             id="prompt"
@@ -92,6 +105,23 @@
                         <div class="progress-bar-container">
                             <div id="batchProgressBar" class="progress-bar-fill"></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 標籤雲區域 -->
+                <div class="tags-section">
+                    <div class="tags-header">
+                        <h3>
+                            <svg class="tags-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <line x1="7" y1="7" x2="7.01" y2="7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            標籤篩選
+                        </h3>
+                        <button id="clearFilterBtn" class="clear-filter-btn" title="清除篩選">✕</button>
+                    </div>
+                    <div id="tagCloud" class="tag-cloud">
+                        <p class="no-tags">尚無標籤</p>
                     </div>
                 </div>
 
@@ -205,6 +235,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/templates.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/advanced.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

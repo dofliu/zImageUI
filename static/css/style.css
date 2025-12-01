@@ -999,3 +999,263 @@ textarea::placeholder {
 .size-selector .size-select {
     width: 100%;
 }
+
+/* ============================================
+   Seed Control Styles
+   ============================================ */
+.seed-control {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.seed-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.seed-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.seed-checkbox-wrapper label {
+    cursor: pointer;
+    color: var(--text-primary);
+    font-weight: 500;
+    margin: 0;
+}
+
+.seed-input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.seed-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.seed-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.seed-input:not(:disabled):focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.random-seed-btn {
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    transition: all 0.3s ease;
+}
+
+.random-seed-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+.seed-hint {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* ============================================
+   Tags Section Styles
+   ============================================ */
+.tags-section {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.tags-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.tags-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.tags-icon {
+    width: 20px;
+    height: 20px;
+    stroke: var(--primary-light);
+}
+
+.clear-filter-btn {
+    padding: 0.25rem 0.5rem;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.clear-filter-btn:hover {
+    background: var(--error-color);
+    color: white;
+    border-color: var(--error-color);
+}
+
+.tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-height: 60px;
+    padding: 0.75rem;
+    background: var(--background);
+    border-radius: 8px;
+}
+
+.no-tags {
+    width: 100%;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+.tag-btn {
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.tag-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.tag-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* ============================================
+   Tag Editor in History Items
+   ============================================ */
+.tag-editor {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: var(--background);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.tag-input {
+    width: calc(100% - 45px);
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.tag-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.add-tag-btn {
+    padding: 0.5rem 0.75rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-left: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.add-tag-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.05);
+}
+
+.item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.item-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--primary-light);
+    color: white;
+    border-radius: 15px;
+    font-size: 0.8rem;
+}
+
+.remove-tag {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0;
+    margin-left: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.remove-tag:hover {
+    color: var(--error-color);
+    transform: scale(1.2);
+}
