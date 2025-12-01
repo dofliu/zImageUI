@@ -38,36 +38,50 @@ let currentFilename = null;
 let currentMode = 'single'; // 'single' or 'batch'
 let batchResults = []; // 存儲批量結果
 
+// 設置 currentFilename 並同步到全域作用域
+function setCurrentFilename(filename) {
+    currentFilename = filename;
+    if (typeof window !== 'undefined') {
+        window.currentFilename = filename;
+    }
+}
+
 // 字數計數器
-promptInput.addEventListener('input', () => {
-    const count = promptInput.value.length;
-    charCount.textContent = `${count} 字`;
-});
+if (promptInput && charCount) {
+    promptInput.addEventListener('input', () => {
+        const count = promptInput.value.length;
+        charCount.textContent = `${count} 字`;
+    });
+}
 
 // 批量提示詞計數器
-batchPrompts.addEventListener('input', () => {
-    const lines = batchPrompts.value.split('\n').filter(line => line.trim() !== '');
-    batchCount.textContent = `${lines.length} 個提示詞`;
-});
+if (batchPrompts && batchCount) {
+    batchPrompts.addEventListener('input', () => {
+        const lines = batchPrompts.value.split('\n').filter(line => line.trim() !== '');
+        batchCount.textContent = `${lines.length} 個提示詞`;
+    });
+}
 
 // 模式切換
-singleModeBtn.addEventListener('click', () => {
-    currentMode = 'single';
-    singleModeBtn.classList.add('active');
-    batchModeBtn.classList.remove('active');
-    singleModeInput.style.display = 'block';
-    batchModeInput.style.display = 'none';
-    btnText.textContent = '開始生成圖片';
-});
+if (singleModeBtn && batchModeBtn) {
+    singleModeBtn.addEventListener('click', () => {
+        currentMode = 'single';
+        singleModeBtn.classList.add('active');
+        batchModeBtn.classList.remove('active');
+        if (singleModeInput) singleModeInput.style.display = 'block';
+        if (batchModeInput) batchModeInput.style.display = 'none';
+        if (btnText) btnText.textContent = '開始生成圖片';
+    });
 
-batchModeBtn.addEventListener('click', () => {
-    currentMode = 'batch';
-    batchModeBtn.classList.add('active');
-    singleModeBtn.classList.remove('active');
-    singleModeInput.style.display = 'none';
-    batchModeInput.style.display = 'block';
-    btnText.textContent = '開始批量生成';
-});
+    batchModeBtn.addEventListener('click', () => {
+        currentMode = 'batch';
+        batchModeBtn.classList.add('active');
+        singleModeBtn.classList.remove('active');
+        if (singleModeInput) singleModeInput.style.display = 'none';
+        if (batchModeInput) batchModeInput.style.display = 'block';
+        if (btnText) btnText.textContent = '開始批量生成';
+    });
+}
 
 // 載入歷史記錄
 async function loadHistory() {
@@ -94,6 +108,29 @@ function createHistoryItem(item) {
     const div = document.createElement('div');
     div.className = 'history-item';
 
+    // 如果在多選模式，添加 checkbox
+    if (typeof selectMode !== 'undefined' && selectMode) {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'history-item-checkbox';
+        checkbox.setAttribute('data-filename', item.filename);
+
+        // 檢查是否已選中
+        if (typeof selectedFiles !== 'undefined' && selectedFiles.has(item.filename)) {
+            checkbox.checked = true;
+        }
+
+        // checkbox 點擊事件
+        checkbox.addEventListener('click', (e) => {
+            e.stopPropagation();  // 防止觸發項目點擊
+            if (typeof toggleFileSelection === 'function') {
+                toggleFileSelection(item.filename, checkbox);
+            }
+        });
+
+        div.appendChild(checkbox);
+    }
+
     const img = document.createElement('img');
     img.className = 'history-item-thumbnail';
     img.src = item.image_url;
@@ -117,9 +154,13 @@ function createHistoryItem(item) {
     div.appendChild(img);
     div.appendChild(content);
 
-    // 點擊歷史記錄項目顯示該圖片
-    div.addEventListener('click', () => {
-        showHistoryImage(item);
+    // 點擊歷史記錄項目顯示該圖片（非多選模式或點擊非 checkbox 區域）
+    div.addEventListener('click', (e) => {
+        // 安全檢查 selectMode 是否存在
+        const isSelectMode = typeof selectMode !== 'undefined' && selectMode;
+        if (!isSelectMode || e.target.tagName !== 'INPUT') {
+            showHistoryImage(item);
+        }
     });
 
     return div;
@@ -134,7 +175,7 @@ function showHistoryImage(item) {
     filename.textContent = `檔案名稱: ${item.filename}`;
 
     currentImageData = item.image_url;
-    currentFilename = item.filename;
+    setCurrentFilename(item.filename);
 
     resultSection.style.display = 'block';
 
@@ -167,13 +208,17 @@ function formatDate(date) {
 }
 
 // 生成圖片
-generateBtn.addEventListener('click', async () => {
-    if (currentMode === 'batch') {
-        await handleBatchGenerate();
-    } else {
-        await handleSingleGenerate();
-    }
-});
+if (generateBtn) {
+    generateBtn.addEventListener('click', async () => {
+        if (currentMode === 'batch') {
+            await handleBatchGenerate();
+        } else {
+            await handleSingleGenerate();
+        }
+    });
+} else {
+    console.error('生成按鈕未找到！');
+}
 
 // 單張生成處理
 async function handleSingleGenerate() {
@@ -221,7 +266,7 @@ async function handleSingleGenerate() {
         if (response.ok && data.success) {
             // 顯示結果
             currentImageData = data.image;
-            currentFilename = data.filename;
+            setCurrentFilename(data.filename);
 
             generatedImage.src = data.image;
             currentPrompt.textContent = data.prompt;
@@ -377,7 +422,7 @@ function showBatchImage(result) {
     filename.textContent = `檔案名稱: ${result.filename}`;
 
     currentImageData = result.image;
-    currentFilename = result.filename;
+    setCurrentFilename(result.filename);
 
     resultSection.style.display = 'block';
 }

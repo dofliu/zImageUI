@@ -1,8 +1,8 @@
 // ==================== 文字疊加功能 ====================
 
-let currentFilename = null;  // 當前圖片檔名
-let selectedPosition = 'top';  // 預設位置
-let selectedColor = 'white';  // 預設顏色
+// 注意: currentFilename 使用 script.js 中的全域變數
+let overlaySelectedPosition = 'top';  // 預設位置
+let overlaySelectedColor = 'white';  // 預設顏色
 
 // 初始化文字疊加功能
 function initTextOverlay() {
@@ -38,7 +38,7 @@ function initTextOverlay() {
         btn.addEventListener('click', () => {
             positionBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            selectedPosition = btn.getAttribute('data-position');
+            overlaySelectedPosition = btn.getAttribute('data-position');
         });
     });
 
@@ -47,7 +47,7 @@ function initTextOverlay() {
         btn.addEventListener('click', () => {
             colorBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            selectedColor = btn.getAttribute('data-color');
+            overlaySelectedColor = btn.getAttribute('data-color');
         });
     });
 
@@ -59,7 +59,10 @@ function initTextOverlay() {
 
 // 顯示文字疊加編輯器
 function showTextOverlayEditor(filename) {
-    currentFilename = filename;
+    // currentFilename 是 script.js 中的全域變數，這裡直接設置
+    if (typeof window !== 'undefined') {
+        window.currentFilename = filename;
+    }
     const textOverlaySection = document.getElementById('textOverlaySection');
 
     if (textOverlaySection) {
@@ -82,7 +85,7 @@ function hideTextOverlayEditor() {
     if (textOverlaySection) {
         textOverlaySection.style.display = 'none';
     }
-    currentFilename = null;
+    // 不需要重設 currentFilename，因為它由 script.js 管理
 }
 
 // 套用文字疊加
@@ -91,7 +94,10 @@ async function applyTextOverlay() {
     const bgOverlayCheck = document.getElementById('bgOverlayCheck');
     const applyTextBtn = document.getElementById('applyTextBtn');
 
-    if (!overlayText || !currentFilename) {
+    // 獲取全域 currentFilename
+    const filename = (typeof window !== 'undefined' && window.currentFilename) || currentFilename;
+
+    if (!overlayText || !filename) {
         console.error('文字輸入或檔案名稱遺失');
         return;
     }
@@ -113,10 +119,10 @@ async function applyTextOverlay() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                filename: currentFilename,
+                filename: filename,
                 text: text,
-                position: selectedPosition,
-                text_color: selectedColor,
+                position: overlaySelectedPosition,
+                text_color: overlaySelectedColor,
                 bg_overlay: bgOverlayCheck ? bgOverlayCheck.checked : true,
                 font_size: 48
             })
@@ -140,8 +146,10 @@ async function applyTextOverlay() {
                 filenameDisplay.textContent = `檔案名稱: ${data.filename}`;
             }
 
-            // 更新當前檔名
-            currentFilename = data.filename;
+            // 更新當前檔名 (全域變數)
+            if (typeof window !== 'undefined') {
+                window.currentFilename = data.filename;
+            }
 
             // 更新下載按鈕
             if (downloadBtn) {

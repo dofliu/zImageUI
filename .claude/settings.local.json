@@ -9,7 +9,11 @@
       "Bash(git branch:*)",
       "Bash(git push:*)",
       "Bash(git commit:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(pip install:*)",
+      "Bash(python app.py:*)",
+      "Bash(timeout 10 python:*)",
+      "Bash(node --check:*)"
     ],
     "deny": [],
     "ask": []

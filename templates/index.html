@@ -135,12 +135,44 @@
                             </svg>
                             歷史記錄
                         </h3>
-                        <button id="clearHistoryBtn" class="clear-btn" title="清除所有歷史">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </button>
+                        <div class="history-actions">
+                            <button id="toggleSelectModeBtn" class="select-mode-btn" title="多選模式">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 11L12 14L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button id="clearHistoryBtn" class="clear-btn" title="清除所有歷史">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- 批量操作工具欄 -->
+                    <div id="batchToolbar" class="batch-toolbar" style="display: none;">
+                        <div class="batch-toolbar-content">
+                            <button id="selectAllBtn" class="batch-btn">全選</button>
+                            <button id="deselectAllBtn" class="batch-btn">取消全選</button>
+                            <span class="selected-count">已選 <strong id="selectedCount">0</strong> 張</span>
+                            <button id="deleteBtn" class="delete-btn" disabled>
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                刪除
+                            </button>
+                            <button id="exportBtn" class="export-btn" disabled>
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                導出
+                            </button>
+                        </div>
+                    </div>
+
                     <div id="historyList" class="history-list">
                         <p class="history-empty">尚無歷史記錄</p>
                     </div>
@@ -304,9 +336,111 @@
         </footer>
     </div>
 
+    <!-- 導出選項對話框 -->
+    <div id="exportDialog" class="modal-overlay" style="display: none;">
+        <div class="modal-content export-modal">
+            <div class="modal-header">
+                <h2>導出圖片集</h2>
+                <button id="closeExportDialog" class="modal-close-btn">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- 導出格式選擇 -->
+                <div class="export-option-group">
+                    <label>導出格式</label>
+                    <div class="format-buttons">
+                        <button class="format-btn active" data-format="pdf">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>PDF</span>
+                            <p class="format-desc">適合列印和文檔分享</p>
+                        </button>
+                        <button class="format-btn" data-format="ppt">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                                <path d="M3 9H21M9 21V9" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            <span>PowerPoint</span>
+                            <p class="format-desc">適合簡報和教學</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 文檔標題 -->
+                <div class="export-option-group">
+                    <label for="exportTitle">文檔標題</label>
+                    <input type="text" id="exportTitle" class="export-input" placeholder="輸入標題（例如：教學圖片集）" value="圖片集">
+                </div>
+
+                <!-- 包含提示詞選項 -->
+                <div class="export-option-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="includePromptsCheck" checked>
+                        <span>包含圖片提示詞</span>
+                    </label>
+                    <p class="option-hint">在 PDF/PPT 中顯示原始生成提示詞</p>
+                </div>
+
+                <!-- PDF 專用選項 -->
+                <div id="pdfOptions" class="export-option-group">
+                    <label>PDF 版面</label>
+                    <div class="layout-buttons">
+                        <button class="layout-btn active" data-layout="single">
+                            <span>單圖</span>
+                            <p class="layout-desc">一頁一張圖</p>
+                        </button>
+                        <button class="layout-btn" data-layout="grid">
+                            <span>網格</span>
+                            <p class="layout-desc">一頁兩張圖</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PPT 專用選項 -->
+                <div id="pptOptions" class="export-option-group" style="display: none;">
+                    <label>簡報主題</label>
+                    <div class="theme-buttons">
+                        <button class="theme-btn active" data-theme="default">
+                            <span>預設</span>
+                        </button>
+                        <button class="theme-btn" data-theme="light">
+                            <span>淺色</span>
+                        </button>
+                        <button class="theme-btn" data-theme="dark">
+                            <span>深色</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 已選圖片預覽 -->
+                <div class="export-option-group">
+                    <label>已選圖片</label>
+                    <div class="selected-preview">
+                        <p id="selectedFilesPreview">將導出 <strong id="exportImageCount">0</strong> 張圖片</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="cancelExportBtn" class="modal-btn cancel-btn">取消</button>
+                <button id="confirmExportBtn" class="modal-btn confirm-btn">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    開始導出
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/templates.js') }}"></script>
     <script src="{{ url_for('static', filename='js/advanced.js') }}"></script>
     <script src="{{ url_for('static', filename='js/textOverlay.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/exportManager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

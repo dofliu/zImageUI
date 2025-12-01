@@ -1,14 +1,14 @@
 # Z-Image-Turbo Web UI
 
-> **v2.1.0** - 功能強大的 AI 圖片生成 Web 應用
+> **v2.3.0** - 功能強大的 AI 圖片生成 Web 應用
 
 一個基於 Flask 的專業 Web 介面,用於 Z-Image-Turbo 文字轉圖片 AI 模型。
-專為 12GB VRAM 顯卡優化,支援批量生成、風格模板、標籤管理等進階功能。
+專為 12GB VRAM 顯卡優化,支援批量生成、風格模板、標籤管理、批量導出、選擇性刪除等進階功能。
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red.svg)
-![Version](https://img.shields.io/badge/version-2.0.0-green.svg)
+![Version](https://img.shields.io/badge/version-2.3.0-green.svg)
 
 ## ✨ 核心特色
 
@@ -20,13 +20,15 @@
 - 📥 **一鍵下載** - 直接下載生成的圖片
 - 🔄 **即時預覽** - 側邊欄布局,提示詞和圖片同時可見
 
-### 🎯 進階功能 (v2.0-v2.1 新增)
+### 🎯 進階功能 (v2.0-v2.3 新增)
 - 🔢 **批量生成** - 一次生成最多 20 張圖片,ZIP 批量下載
 - 🎭 **風格模板** - 50+ 專業風格,7 大分類快速選擇
 - 📐 **尺寸預設** - 15+ 社群/列印尺寸,一鍵切換
 - 🏷️ **標籤系統** - 為圖片添加標籤,智能分類與過濾
 - 🎲 **Seed 控制** - 固定種子重現結果,便於調試優化
 - 📝 **文字疊加** - 在圖片上添加標題與說明,支援中文字體
+- 📦 **批量導出** - 多張圖片導出為 PDF 或 PowerPoint,便於教學與簡報
+- 🗑️ **選擇性刪除** - 批量刪除選定圖片,安全確認機制 (v2.3 新增)
 
 ## 🖼️ 介面預覽
 
@@ -60,7 +62,7 @@ cd zImageUI
 2. **安裝依賴套件**
 ```bash
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
-pip install diffusers transformers accelerate flask pillow
+pip install diffusers transformers accelerate flask pillow reportlab python-pptx
 ```
 
 3. **首次運行 (下載模型)**
@@ -148,6 +150,41 @@ DEBUG = False             # 除錯模式
 - 簡報封面製作
 - 圖片說明文字
 
+### 📦 批量操作 (v2.2-v2.3 新增)
+
+#### 批量導出 (v2.2.0)
+1. 點擊「多選模式」按鈕啟用多選功能
+2. 勾選要導出的圖片（支援全選/取消全選）
+3. 點擊「導出」按鈕開啟導出對話框
+4. 選擇導出格式：
+   - **PDF 格式**：單頁/雙欄/網格 三種版面配置
+   - **PowerPoint 格式**：簡潔/專業/教學 三種主題風格
+5. 輸入標題（選填）
+6. 勾選「包含提示詞」選項（可選）
+7. 點擊「開始導出」下載檔案
+
+**使用場景**：
+- 教學簡報製作
+- 設計作品集整理
+- 教材文檔編排
+- 成果報告製作
+
+#### 批量刪除 (v2.3.0 新增)
+1. 在多選模式下勾選要刪除的圖片
+2. 點擊紅色「刪除」按鈕
+3. 確認刪除操作（此操作無法復原）
+4. 系統自動刪除圖片檔案並更新歷史記錄
+
+**功能特點**：
+- 支援批量選擇（最多一次導出/刪除所有歷史圖片）
+- PDF 三種版面：單頁模式/雙欄模式/網格模式
+- PPT 三種主題：簡潔風格/專業風格/教學風格
+- 可選擇是否包含提示詞說明
+- 自動生成帶時間戳的檔案名稱
+- 支援下載進度顯示
+- 安全刪除確認對話框
+- 詳細的操作結果反饋
+
 ### VRAM 優化
 
 本專案針對 12GB VRAM 進行了優化:
@@ -182,7 +219,7 @@ DEBUG = False             # 除錯模式
 
 ```
 zImageUI/
-├── app.py                      # Flask 主程式 (已升級 v2.1)
+├── app.py                      # Flask 主程式 (已升級 v2.2)
 ├── config.py                   # 配置文件
 ├── templates.json              # 風格模板資料庫 (50+ 風格)
 ├── claude.md                   # 開發計劃文檔
@@ -191,15 +228,16 @@ zImageUI/
 ├── imageGEN_Z.py              # 原始命令列版本
 ├── check_model_cache.py       # 模型快取檢查工具
 ├── templates/
-│   └── index.html             # 網頁介面 (已升級 v2.1)
+│   └── index.html             # 網頁介面 (已升級 v2.2)
 ├── static/
 │   ├── css/
-│   │   └── style.css          # 樣式表 (1500+ 行)
+│   │   └── style.css          # 樣式表 (2300+ 行)
 │   └── js/
 │       ├── script.js          # 主 JavaScript (已升級)
 │       ├── templates.js       # 風格/尺寸選擇器
 │       ├── advanced.js        # 標籤/Seed 功能
-│       └── textOverlay.js     # 文字疊加功能 (新增)
+│       ├── textOverlay.js     # 文字疊加功能
+│       └── exportManager.js   # 批量導出功能 (v2.2 新增)
 ├── cache/                      # 模型快取目錄 (自動生成)
 ├── generated_images/           # 生成圖片儲存目錄 (自動生成)
 └── README.md                   # 本文件
@@ -245,8 +283,11 @@ python imageGEN_Z.py
 - `POST /history/filter` - 根據標籤過濾歷史
 - `POST /seed-control` - 使用固定 Seed 生成
 - `POST /add-text-overlay` - 在圖片上添加文字疊加
+- `POST /export-pdf` - 批量導出為 PDF 文檔 (v2.2 新增)
+- `POST /export-ppt` - 批量導出為 PowerPoint (v2.2 新增)
+- `POST /delete-images` - 批量刪除選定圖片 (v2.3 新增)
 
-**共 13 個 API 端點**
+**共 16 個 API 端點**
 
 詳細 API 說明請參考 [FEATURES.md](FEATURES.md)
 
@@ -288,6 +329,42 @@ A: 編輯 `config.py` 中的 `OUTPUT_PATH` 設定。
 本專案採用 MIT 授權條款 - 詳見 [LICENSE](LICENSE) 文件
 
 ## 📝 更新日誌
+
+### v2.3.0 (2025-12-02)
+- ✅ **新增選擇性刪除功能**
+  - 批量刪除選定圖片
+  - 紅色刪除按鈕 UI (警告色系)
+  - 刪除確認對話框 (防止誤刪)
+  - 同步刪除檔案與歷史記錄
+  - 詳細的成功/失敗統計反饋
+  - 自動重新載入歷史列表
+- ✅ **UI/UX 改進**
+  - 修復導出對話框按鈕顏色問題 (更鮮明易識別)
+  - 修復風格選擇器文字壓縮問題 (完整顯示)
+  - 刷新按鈕改為浮動定位
+  - 按鈕尺寸與字體優化
+- ✅ 新增 `/delete-images` API 端點
+- ✅ exportManager.js 增強 (新增 80+ 行刪除邏輯)
+- ✅ 新增 CSS 樣式 (刪除按鈕 + UI 修復)
+- ✅ 總共 16 個 API 端點
+
+### v2.2.0 (2025-12-02)
+- ✅ **新增批量導出功能**
+  - PDF 導出支援 (單頁/雙欄/網格 三種版面)
+  - PowerPoint 導出支援 (簡潔/專業/教學 三種主題)
+  - 多選模式與批量選擇 UI
+  - 導出對話框與選項設定
+  - 可選擇是否包含提示詞說明
+  - 自動生成帶時間戳的檔案名稱
+- ✅ 新增 exportManager.js 模組 (330+ 行)
+- ✅ 新增 `/export-pdf` 和 `/export-ppt` API 端點
+- ✅ 新增 430+ 行 CSS 樣式
+- ✅ 安裝 reportlab 和 python-pptx 套件
+- ✅ **修復關鍵 Bug**
+  - 修復 JavaScript 變數重複宣告導致生成按鈕失效的問題
+  - 新增 DOM 元素存在性檢查,提升程式穩定性
+  - 優化模組間變數共享機制
+- ✅ 總共 15 個 API 端點
 
 ### v2.1.0 (2025-12-02)
 - ✅ **新增文字疊加功能**

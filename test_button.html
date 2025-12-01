@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>按鈕測試</title>
+</head>
+<body>
+    <h1>按鈕測試頁面</h1>
+    <button id="testBtn">測試按鈕</button>
+    <p id="output">尚未點擊</p>
+
+    <script>
+        console.log('Script loaded');
+        const btn = document.getElementById('testBtn');
+        const output = document.getElementById('output');
+
+        if (btn) {
+            console.log('Button found');
+            btn.addEventListener('click', () => {
+                console.log('Button clicked!');
+                output.textContent = '按鈕已點擊！時間: ' + new Date().toLocaleTimeString();
+            });
+        } else {
+            console.error('Button not found');
+        }
+    </script>
+</body>
+</html>
