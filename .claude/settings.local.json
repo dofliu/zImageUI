@@ -3,7 +3,13 @@
     "allow": [
       "Bash(dir:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: Z-Image-Turbo Web UI\n\nFeatures:\n- Beautiful web interface for image generation\n- Side-by-side layout with prompt input and image display\n- History tracking with thumbnails\n- Optimized for 12GB VRAM using Sequential CPU Offload\n- Datetime-based filename generation\n- Base64 image encoding for web display\n- Responsive design with gradient UI\n\nTechnical Stack:\n- Flask backend with Z-Image-Turbo model\n- Vanilla JavaScript frontend\n- Sequential CPU Offload for memory optimization\n- Attention slicing and VAE slicing enabled\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []

@@ -16,13 +16,57 @@ const retryBtn = document.getElementById('retryBtn');
 const historyList = document.getElementById('historyList');
 const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
+// 批量生成相關元素
+const singleModeBtn = document.getElementById('singleModeBtn');
+const batchModeBtn = document.getElementById('batchModeBtn');
+const singleModeInput = document.getElementById('singleModeInput');
+const batchModeInput = document.getElementById('batchModeInput');
+const batchPrompts = document.getElementById('batchPrompts');
+const batchCount = document.getElementById('batchCount');
+const batchProgress = document.getElementById('batchProgress');
+const currentProgress = document.getElementById('currentProgress');
+const totalProgress = document.getElementById('totalProgress');
+const batchProgressBar = document.getElementById('batchProgressBar');
+const batchResultSection = document.getElementById('batchResultSection');
+const batchResultGrid = document.getElementById('batchResultGrid');
+const batchSuccessCount = document.getElementById('batchSuccessCount');
+const batchFailCount = document.getElementById('batchFailCount');
+const batchDownloadBtn = document.getElementById('batchDownloadBtn');
+
 let currentImageData = null;
 let currentFilename = null;
+let currentMode = 'single'; // 'single' or 'batch'
+let batchResults = []; // 存儲批量結果
 
 // 字數計數器
 promptInput.addEventListener('input', () => {
     const count = promptInput.value.length;
     charCount.textContent = `${count} 字`;
+});
+
+// 批量提示詞計數器
+batchPrompts.addEventListener('input', () => {
+    const lines = batchPrompts.value.split('\n').filter(line => line.trim() !== '');
+    batchCount.textContent = `${lines.length} 個提示詞`;
+});
+
+// 模式切換
+singleModeBtn.addEventListener('click', () => {
+    currentMode = 'single';
+    singleModeBtn.classList.add('active');
+    batchModeBtn.classList.remove('active');
+    singleModeInput.style.display = 'block';
+    batchModeInput.style.display = 'none';
+    btnText.textContent = '開始生成圖片';
+});
+
+batchModeBtn.addEventListener('click', () => {
+    currentMode = 'batch';
+    batchModeBtn.classList.add('active');
+    singleModeBtn.classList.remove('active');
+    singleModeInput.style.display = 'none';
+    batchModeInput.style.display = 'block';
+    btnText.textContent = '開始批量生成';
 });
 
 // 載入歷史記錄
@@ -119,6 +163,15 @@ function formatDate(date) {
 
 // 生成圖片
 generateBtn.addEventListener('click', async () => {
+    if (currentMode === 'batch') {
+        await handleBatchGenerate();
+    } else {
+        await handleSingleGenerate();
+    }
+});
+
+// 單張生成處理
+async function handleSingleGenerate() {
     const prompt = promptInput.value.trim();
 
     if (!prompt) {
@@ -135,14 +188,27 @@ generateBtn.addEventListener('click', async () => {
     btnText.textContent = '生成中...';
 
     try {
+        // 獲取風格和尺寸設定
+        const styleKeywords = typeof getSelectedStyle === 'function' ? getSelectedStyle() : '';
+        const sizeSettings = typeof getSelectedSize === 'function' ? getSelectedSize() : null;
+
+        const requestBody = {
+            prompt: prompt,
+            style_keywords: styleKeywords
+        };
+
+        // 如果有自定義尺寸，添加到請求
+        if (sizeSettings) {
+            requestBody.width = sizeSettings.width;
+            requestBody.height = sizeSettings.height;
+        }
+
         const response = await fetch('/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                prompt: prompt
-            }),
+            body: JSON.stringify(requestBody),
         });
 
         const data = await response.json();
@@ -169,7 +235,181 @@ generateBtn.addEventListener('click', async () => {
         showError(error.message || '發生未知錯誤，請稍後再試');
     } finally {
         generateBtn.disabled = false;
-        btnText.textContent = '開始生成圖片';
+        btnText.textContent = currentMode === 'batch' ? '開始批量生成' : '開始生成圖片';
+    }
+}
+
+// 批量生成處理
+async function handleBatchGenerate() {
+    const lines = batchPrompts.value.split('\n').filter(line => line.trim() !== '');
+
+    if (lines.length === 0) {
+        showError('請輸入至少一個提示詞');
+        return;
+    }
+
+    if (lines.length > 20) {
+        showError('批量生成最多支援 20 個提示詞');
+        return;
+    }
+
+    // 隱藏之前的結果
+    hideAllSections();
+
+    // 顯示載入中和進度條
+    loadingSection.style.display = 'flex';
+    batchProgress.style.display = 'block';
+    generateBtn.disabled = true;
+    btnText.textContent = '批量生成中...';
+
+    // 初始化進度
+    totalProgress.textContent = lines.length;
+    currentProgress.textContent = '0';
+    batchProgressBar.style.width = '0%';
+
+    batchResults = [];
+
+    try {
+        const response = await fetch('/batch-generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prompts: lines
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            batchResults = data.results;
+
+            // 顯示批量結果
+            loadingSection.style.display = 'none';
+            batchProgress.style.display = 'none';
+            displayBatchResults(data);
+
+            // 重新載入歷史記錄
+            loadHistory();
+        } else {
+            throw new Error(data.error || '批量生成失敗');
+        }
+    } catch (error) {
+        console.error('批量生成錯誤:', error);
+        showError(error.message || '批量生成失敗，請稍後再試');
+        batchProgress.style.display = 'none';
+    } finally {
+        generateBtn.disabled = false;
+        btnText.textContent = '開始批量生成';
+    }
+}
+
+// 顯示批量結果
+function displayBatchResults(data) {
+    batchResultSection.style.display = 'block';
+    batchSuccessCount.textContent = data.succeeded;
+    batchFailCount.textContent = data.failed;
+
+    // 清空之前的結果
+    batchResultGrid.innerHTML = '';
+
+    // 添加每個結果項目
+    data.results.forEach(result => {
+        const item = createBatchResultItem(result);
+        batchResultGrid.appendChild(item);
+    });
+}
+
+// 創建批量結果項目
+function createBatchResultItem(result) {
+    const div = document.createElement('div');
+    div.className = `batch-result-item ${result.success ? '' : 'failed'}`;
+
+    if (result.success) {
+        div.innerHTML = `
+            <img src="${result.image}" alt="${result.prompt}" class="batch-result-image">
+            <div class="batch-result-info">
+                <div class="batch-result-prompt">${result.prompt}</div>
+                <div class="batch-result-status">
+                    <span class="success-badge">✓ 成功</span>
+                    <span>#${result.index}</span>
+                </div>
+            </div>
+        `;
+
+        // 點擊顯示大圖
+        div.addEventListener('click', () => {
+            showBatchImage(result);
+        });
+    } else {
+        div.innerHTML = `
+            <div class="batch-result-info">
+                <div class="batch-result-prompt">${result.prompt}</div>
+                <div class="batch-result-status">
+                    <span class="error-badge">✗ 失敗</span>
+                    <span>#${result.index}</span>
+                </div>
+                <div class="batch-error-message">${result.error}</div>
+            </div>
+        `;
+    }
+
+    return div;
+}
+
+// 顯示批量圖片大圖
+function showBatchImage(result) {
+    hideAllSections();
+
+    generatedImage.src = result.image;
+    currentPrompt.textContent = result.prompt;
+    filename.textContent = `檔案名稱: ${result.filename}`;
+
+    currentImageData = result.image;
+    currentFilename = result.filename;
+
+    resultSection.style.display = 'block';
+}
+
+// 批量下載按鈕
+batchDownloadBtn.addEventListener('click', async () => {
+    const successResults = batchResults.filter(r => r.success);
+
+    if (successResults.length === 0) {
+        alert('沒有成功的圖片可以下載');
+        return;
+    }
+
+    const filenames = successResults.map(r => r.filename);
+
+    try {
+        const response = await fetch('/batch-download', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                filenames: filenames
+            }),
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `batch_images_${new Date().getTime()}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } else {
+            throw new Error('下載失敗');
+        }
+    } catch (error) {
+        console.error('下載錯誤:', error);
+        alert('下載失敗: ' + error.message);
     }
 });
 
@@ -228,8 +468,10 @@ function showError(message) {
 function hideAllSections() {
     loadingSection.style.display = 'none';
     resultSection.style.display = 'none';
+    batchResultSection.style.display = 'none';
     errorSection.style.display = 'none';
     welcomeSection.style.display = 'none';
+    batchProgress.style.display = 'none';
 }
 
 // 支援 Enter 快速生成 (Shift+Enter 換行)

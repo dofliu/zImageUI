@@ -1,13 +1,15 @@
 import torch
 import os
 from diffusers import ZImagePipeline
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, send_file
 from datetime import datetime
 import base64
 from io import BytesIO
 import random
 import config  # 導入配置檔案
 import json
+import zipfile
+import tempfile
 
 app = Flask(__name__)
 
@@ -15,6 +17,7 @@ app = Flask(__name__)
 cache_path = config.CACHE_PATH
 output_path = config.OUTPUT_PATH
 history_file = os.path.join(output_path, "history.json")
+templates_file = os.path.join(os.path.dirname(__file__), "templates.json")
 os.makedirs(cache_path, exist_ok=True)
 os.makedirs(output_path, exist_ok=True)
 
@@ -150,9 +153,22 @@ def generate_image():
     try:
         data = request.get_json()
         prompt = data.get('prompt', '')
+        style_keywords = data.get('style_keywords', '')  # 風格關鍵字
+        custom_width = data.get('width')  # 自定義寬度
+        custom_height = data.get('height')  # 自定義高度
 
         if not prompt:
             return jsonify({'error': '請輸入提示詞'}), 400
+
+        # 組合風格關鍵字到提示詞
+        if style_keywords:
+            full_prompt = f"{prompt}, {style_keywords}"
+        else:
+            full_prompt = prompt
+
+        # 確定使用的尺寸
+        width = custom_width if custom_width else config.IMAGE_WIDTH
+        height = custom_height if custom_height else config.IMAGE_HEIGHT
 
         # 確保模型已載入
         initialize_model()
@@ -163,13 +179,15 @@ def generate_image():
             print("✓ 已清理 GPU 快取")
 
         # 生成圖像
-        print(f"開始生成：{prompt}")
+        print(f"開始生成：{full_prompt}")
+        if style_keywords:
+            print(f"風格: {style_keywords}")
         # 使用隨機種子,讓每次生成的圖片都不同
         seed = random.randint(0, 2**32 - 1)
         print(f"使用種子: {seed}")
 
         # 使用配置檔案中的參數生成圖片
-        print(f"生成解析度: {config.IMAGE_WIDTH}x{config.IMAGE_HEIGHT}")
+        print(f"生成解析度: {width}x{height}")
 
         # 生成圖片
         # 使用 CUDA generator 以確保與模型在同一設備
@@ -177,9 +195,9 @@ def generate_image():
         generator = torch.Generator(device=device).manual_seed(seed)
 
         image = pipe(
-            prompt=prompt,
-            height=config.IMAGE_HEIGHT,
-            width=config.IMAGE_WIDTH,
+            prompt=full_prompt,
+            height=height,
+            width=width,
             num_inference_steps=config.NUM_INFERENCE_STEPS,
             guidance_scale=config.GUIDANCE_SCALE,
             generator=generator,
@@ -242,6 +260,200 @@ def clear_history():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/batch-generate', methods=['POST'])
+def batch_generate():
+    """批量生成圖片 API"""
+    try:
+        data = request.get_json()
+        prompts = data.get('prompts', [])
+
+        if not prompts or len(prompts) == 0:
+            return jsonify({'error': '請輸入至少一個提示詞'}), 400
+
+        # 限制批量數量 (避免 VRAM 問題)
+        max_batch = 20
+        if len(prompts) > max_batch:
+            return jsonify({'error': f'批量生成最多支援 {max_batch} 張圖片'}), 400
+
+        # 確保模型已載入
+        initialize_model()
+
+        results = []
+        failed_prompts = []
+
+        print(f"\n開始批量生成 {len(prompts)} 張圖片...")
+
+        for idx, prompt in enumerate(prompts, 1):
+            prompt = prompt.strip()
+            if not prompt:
+                continue
+
+            try:
+                # 生成前清理 GPU 快取
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+
+                print(f"\n[{idx}/{len(prompts)}] 生成：{prompt}")
+
+                # 使用隨機種子
+                seed = random.randint(0, 2**32 - 1)
+                print(f"使用種子: {seed}")
+
+                # 生成圖片
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+                generator = torch.Generator(device=device).manual_seed(seed)
+
+                image = pipe(
+                    prompt=prompt,
+                    height=config.IMAGE_HEIGHT,
+                    width=config.IMAGE_WIDTH,
+                    num_inference_steps=config.NUM_INFERENCE_STEPS,
+                    guidance_scale=config.GUIDANCE_SCALE,
+                    generator=generator,
+                ).images[0]
+
+                # 生成檔案名稱
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"batch_{timestamp}_{idx:03d}.png"
+                save_path = os.path.join(output_path, filename)
+
+                # 儲存圖片
+                image.save(save_path)
+                print(f"✓ 圖片已儲存: {filename}")
+
+                # 添加到歷史記錄
+                add_to_history(prompt, filename)
+
+                # 轉換為 base64
+                buffered = BytesIO()
+                image.save(buffered, format="PNG")
+                img_str = base64.b64encode(buffered.getvalue()).decode()
+
+                results.append({
+                    'success': True,
+                    'prompt': prompt,
+                    'filename': filename,
+                    'image': f"data:image/png;base64,{img_str}",
+                    'index': idx
+                })
+
+            except Exception as e:
+                print(f"✗ 生成失敗 [{idx}/{len(prompts)}]: {str(e)}")
+                failed_prompts.append({
+                    'prompt': prompt,
+                    'index': idx,
+                    'error': str(e)
+                })
+                results.append({
+                    'success': False,
+                    'prompt': prompt,
+                    'error': str(e),
+                    'index': idx
+                })
+
+        print(f"\n批量生成完成! 成功: {len(results) - len(failed_prompts)}/{len(prompts)}")
+
+        return jsonify({
+            'success': True,
+            'total': len(prompts),
+            'succeeded': len(results) - len(failed_prompts),
+            'failed': len(failed_prompts),
+            'results': results,
+            'message': f'批量生成完成，成功 {len(results) - len(failed_prompts)} 張，失敗 {len(failed_prompts)} 張'
+        })
+
+    except Exception as e:
+        print(f"批量生成錯誤：{str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/batch-download', methods=['POST'])
+def batch_download():
+    """批量下載圖片為 ZIP"""
+    try:
+        data = request.get_json()
+        filenames = data.get('filenames', [])
+
+        if not filenames:
+            return jsonify({'error': '沒有要下載的檔案'}), 400
+
+        # 建立臨時 ZIP 檔案
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        zip_filename = f"batch_images_{timestamp}.zip"
+        zip_path = os.path.join(tempfile.gettempdir(), zip_filename)
+
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for filename in filenames:
+                file_path = os.path.join(output_path, filename)
+                if os.path.exists(file_path):
+                    zipf.write(file_path, filename)
+
+        # 發送檔案後刪除臨時檔案
+        return send_file(
+            zip_path,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=zip_filename
+        )
+
+    except Exception as e:
+        print(f"批量下載錯誤：{str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/templates', methods=['GET'])
+def get_templates():
+    """獲取風格模板列表"""
+    try:
+        if os.path.exists(templates_file):
+            with open(templates_file, 'r', encoding='utf-8') as f:
+                templates = json.load(f)
+            return jsonify({
+                'success': True,
+                'templates': templates
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': '模板檔案不存在'
+            }), 404
+    except Exception as e:
+        print(f"讀取模板錯誤：{str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/size-presets', methods=['GET'])
+def get_size_presets():
+    """獲取尺寸預設列表"""
+    presets = {
+        "社群媒體": [
+            {"name": "Instagram 正方形", "width": 1080, "height": 1080, "ratio": "1:1"},
+            {"name": "Instagram 直式", "width": 1080, "height": 1350, "ratio": "4:5"},
+            {"name": "Facebook 封面", "width": 1200, "height": 630, "ratio": "1.91:1"},
+            {"name": "Twitter 卡片", "width": 1200, "height": 675, "ratio": "16:9"},
+            {"name": "YouTube 縮圖", "width": 1280, "height": 720, "ratio": "16:9"}
+        ],
+        "列印尺寸": [
+            {"name": "A4 直式", "width": 2480, "height": 3508, "ratio": "A4"},
+            {"name": "A4 橫式", "width": 3508, "height": 2480, "ratio": "A4"},
+            {"name": "A5 直式", "width": 1748, "height": 2480, "ratio": "A5"},
+            {"name": "明信片", "width": 1600, "height": 1200, "ratio": "4:3"}
+        ],
+        "標準尺寸": [
+            {"name": "正方形 512", "width": 512, "height": 512, "ratio": "1:1", "vram": "低"},
+            {"name": "正方形 768", "width": 768, "height": 768, "ratio": "1:1", "vram": "中"},
+            {"name": "正方形 1024", "width": 1024, "height": 1024, "ratio": "1:1", "vram": "高"},
+            {"name": "寬屏 16:9", "width": 1024, "height": 576, "ratio": "16:9", "vram": "中"},
+            {"name": "直式 9:16", "width": 576, "height": 1024, "ratio": "9:16", "vram": "中"}
+        ]
+    }
+
+    return jsonify({
+        'success': True,
+        'presets': presets,
+        'current': {
+            'width': config.IMAGE_WIDTH,
+            'height': config.IMAGE_HEIGHT
+        }
+    })
 
 if __name__ == '__main__':
     # 顯示配置資訊

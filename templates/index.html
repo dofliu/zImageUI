@@ -26,16 +26,54 @@
             <!-- 左側：輸入區域 -->
             <aside class="sidebar">
                 <div class="input-section">
-                    <div class="input-wrapper">
+                    <!-- 模式切換 -->
+                    <div class="mode-switch">
+                        <button id="singleModeBtn" class="mode-btn active">單張生成</button>
+                        <button id="batchModeBtn" class="mode-btn">批量生成</button>
+                    </div>
+
+                    <!-- 單張模式輸入 -->
+                    <div id="singleModeInput" class="input-wrapper">
+                        <!-- 風格選擇器 -->
+                        <div class="style-selector">
+                            <label>風格模板（可選）</label>
+                            <select id="styleSelect" class="style-select">
+                                <option value="">無風格（使用原始提示詞）</option>
+                            </select>
+                            <button id="refreshStylesBtn" class="refresh-btn" title="刷新風格列表">⟳</button>
+                        </div>
+
+                        <!-- 尺寸選擇器 -->
+                        <div class="size-selector">
+                            <label>圖片尺寸</label>
+                            <select id="sizeSelect" class="size-select">
+                                <option value="default">預設尺寸 (768x768)</option>
+                            </select>
+                        </div>
+
                         <label for="prompt">請輸入您的圖片描述提示詞</label>
                         <textarea
                             id="prompt"
-                            placeholder="例如：用圖文圖卡圖片來說明存在主義，日式漫畫風格，請知名動漫角色來協助說明加強效果..."
-                            rows="6"
+                            placeholder="例如：一隻貓咪坐在窗邊，溫暖的陽光..."
+                            rows="4"
                         ></textarea>
                         <div class="input-info">
                             <span class="tip">💡 支援中英文混合描述</span>
                             <span class="char-count" id="charCount">0 字</span>
+                        </div>
+                    </div>
+
+                    <!-- 批量模式輸入 -->
+                    <div id="batchModeInput" class="input-wrapper" style="display: none;">
+                        <label for="batchPrompts">批量提示詞（每行一個）</label>
+                        <textarea
+                            id="batchPrompts"
+                            placeholder="水彩風格的貓咪&#10;油畫風格的日落&#10;賽博龐克風格的城市&#10;&#10;最多 20 個提示詞，每行一個"
+                            rows="10"
+                        ></textarea>
+                        <div class="input-info">
+                            <span class="tip">💡 每行一個提示詞，最多 20 個</span>
+                            <span class="batch-count" id="batchCount">0 個提示詞</span>
                         </div>
                     </div>
 
@@ -45,6 +83,16 @@
                         </svg>
                         <span id="btnText">開始生成圖片</span>
                     </button>
+
+                    <!-- 批量進度顯示 -->
+                    <div id="batchProgress" class="batch-progress" style="display: none;">
+                        <div class="progress-text">
+                            正在生成: <span id="currentProgress">0</span> / <span id="totalProgress">0</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="batchProgressBar" class="progress-bar-fill"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 歷史記錄區域 -->
@@ -77,7 +125,7 @@
                     <p class="loading-text">正在生成您的圖片，請稍候...</p>
                     <p class="loading-subtext">這可能需要幾秒鐘</p>
                 </div>
-                <!-- 生成結果 -->
+                <!-- 單張生成結果 -->
                 <div id="resultSection" class="result-section" style="display: none;">
                     <div class="result-header">
                         <h2>生成結果</h2>
@@ -101,6 +149,29 @@
                             <p id="currentPrompt"></p>
                         </div>
                         <p class="filename" id="filename"></p>
+                    </div>
+                </div>
+
+                <!-- 批量生成結果 -->
+                <div id="batchResultSection" class="batch-result-section" style="display: none;">
+                    <div class="result-header">
+                        <h2>批量生成結果</h2>
+                        <button id="batchDownloadBtn" class="download-btn">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            下載全部 (ZIP)
+                        </button>
+                    </div>
+
+                    <div class="batch-summary">
+                        <p>成功生成 <strong id="batchSuccessCount">0</strong> 張，失敗 <strong id="batchFailCount">0</strong> 張</p>
+                    </div>
+
+                    <div id="batchResultGrid" class="batch-result-grid">
+                        <!-- 批量結果將動態插入這裡 -->
                     </div>
                 </div>
 
@@ -133,6 +204,7 @@
         </footer>
     </div>
 
+    <script src="{{ url_for('static', filename='js/templates.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

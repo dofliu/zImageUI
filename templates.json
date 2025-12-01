@@ -1,0 +1,176 @@
+{
+  "艺术风格": [
+    {
+      "name": "水彩畫",
+      "keywords": "watercolor style, soft colors, flowing",
+      "description": "柔和的水彩風格，色彩流動自然"
+    },
+    {
+      "name": "油畫",
+      "keywords": "oil painting, thick brushstrokes, classical art style",
+      "description": "經典油畫風格，筆觸厚重"
+    },
+    {
+      "name": "素描",
+      "keywords": "pencil sketch, black and white, hand-drawn",
+      "description": "鉛筆素描，黑白手繪風格"
+    },
+    {
+      "name": "水墨畫",
+      "keywords": "Chinese ink painting, traditional style, monochrome",
+      "description": "中國傳統水墨畫風格"
+    },
+    {
+      "name": "浮世繪",
+      "keywords": "ukiyo-e style, Japanese woodblock print, traditional",
+      "description": "日本浮世繪版畫風格"
+    },
+    {
+      "name": "印象派",
+      "keywords": "impressionist style, soft brush strokes, dreamy atmosphere",
+      "description": "印象派藝術風格"
+    }
+  ],
+  "現代風格": [
+    {
+      "name": "賽博龐克",
+      "keywords": "cyberpunk, neon lights, futuristic city, dark atmosphere",
+      "description": "未來科技霓虹燈風格"
+    },
+    {
+      "name": "極簡主義",
+      "keywords": "minimalist, simple, clean design, monochrome",
+      "description": "簡約乾淨的設計風格"
+    },
+    {
+      "name": "復古風",
+      "keywords": "retro style, vintage, 1980s aesthetic",
+      "description": "80年代復古懷舊風格"
+    },
+    {
+      "name": "蒸汽龐克",
+      "keywords": "steampunk, Victorian era, mechanical, brass and copper",
+      "description": "維多利亞時代機械風格"
+    },
+    {
+      "name": "波普藝術",
+      "keywords": "pop art, bright colors, bold graphics, comic style",
+      "description": "鮮豔大膽的波普藝術"
+    }
+  ],
+  "動漫風格": [
+    {
+      "name": "吉卜力風格",
+      "keywords": "Studio Ghibli style, anime, soft colors, dreamy",
+      "description": "宮崎駿吉卜力工作室風格"
+    },
+    {
+      "name": "日式動漫",
+      "keywords": "anime style, manga, Japanese animation",
+      "description": "日本動漫風格"
+    },
+    {
+      "name": "迪士尼風格",
+      "keywords": "Disney style, cartoon, colorful, cheerful",
+      "description": "迪士尼卡通風格"
+    },
+    {
+      "name": "像素藝術",
+      "keywords": "pixel art, 8-bit, retro game style",
+      "description": "8位元像素遊戲風格"
+    },
+    {
+      "name": "漫畫風格",
+      "keywords": "comic book style, bold lines, halftone dots",
+      "description": "美式漫畫風格"
+    }
+  ],
+  "攝影風格": [
+    {
+      "name": "電影風格",
+      "keywords": "cinematic, film photography, dramatic lighting",
+      "description": "電影般的光影效果"
+    },
+    {
+      "name": "黑白攝影",
+      "keywords": "black and white photography, high contrast, monochrome",
+      "description": "經典黑白攝影"
+    },
+    {
+      "name": "HDR",
+      "keywords": "HDR photography, high dynamic range, vivid colors",
+      "description": "高動態範圍攝影"
+    },
+    {
+      "name": "微距攝影",
+      "keywords": "macro photography, extreme close-up, detailed",
+      "description": "極致細節特寫"
+    }
+  ],
+  "教學模板": [
+    {
+      "name": "科學圖解",
+      "keywords": "scientific illustration, educational, clear diagram, labeled",
+      "description": "清晰的科學教學圖解"
+    },
+    {
+      "name": "歷史場景",
+      "keywords": "historical scene, period accurate, documentary style",
+      "description": "歷史時代場景重現"
+    },
+    {
+      "name": "文學插圖",
+      "keywords": "book illustration, storybook style, narrative art",
+      "description": "文學作品插畫風格"
+    },
+    {
+      "name": "地理景觀",
+      "keywords": "landscape, geographic, natural scenery, realistic",
+      "description": "地理自然景觀"
+    },
+    {
+      "name": "信息圖表",
+      "keywords": "infographic, data visualization, clear and simple",
+      "description": "資訊圖表設計"
+    }
+  ],
+  "3D渲染": [
+    {
+      "name": "寫實3D",
+      "keywords": "3D render, photorealistic, ray tracing, highly detailed",
+      "description": "逼真的3D渲染效果"
+    },
+    {
+      "name": "低多邊形",
+      "keywords": "low poly, 3D geometric, minimalist 3D",
+      "description": "低多邊形幾何風格"
+    },
+    {
+      "name": "黏土渲染",
+      "keywords": "clay render, 3D illustration, soft and smooth",
+      "description": "柔和的黏土質感3D"
+    }
+  ],
+  "特殊效果": [
+    {
+      "name": "霓虹發光",
+      "keywords": "neon glow, glowing edges, vibrant colors",
+      "description": "霓虹發光效果"
+    },
+    {
+      "name": "水晶質感",
+      "keywords": "crystal, glass material, translucent, reflective",
+      "description": "透明水晶玻璃質感"
+    },
+    {
+      "name": "金屬質感",
+      "keywords": "metallic, chrome, shiny metal surface",
+      "description": "閃亮金屬表面"
+    },
+    {
+      "name": "夢幻光效",
+      "keywords": "dreamy, soft focus, bokeh, magical lighting",
+      "description": "夢幻般的光暈效果"
+    }
+  ]
+}
