@@ -180,6 +180,76 @@
                         </div>
                         <p class="filename" id="filename"></p>
                     </div>
+
+                    <!-- 文字疊加編輯器 -->
+                    <div id="textOverlaySection" class="text-overlay-section" style="display: none;">
+                        <div class="text-overlay-header">
+                            <h3>
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <path d="M4 7H20M4 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                添加文字
+                            </h3>
+                            <button id="toggleTextEditor" class="toggle-btn">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div id="textEditorPanel" class="text-editor-panel">
+                            <!-- 文字輸入 -->
+                            <div class="text-input-group">
+                                <label for="overlayText">文字內容</label>
+                                <input type="text" id="overlayText" class="text-input" placeholder="輸入要疊加的文字..." maxlength="100">
+                                <span class="text-counter">0 / 100</span>
+                            </div>
+
+                            <!-- 位置選擇 -->
+                            <div class="position-group">
+                                <label>文字位置</label>
+                                <div class="position-buttons">
+                                    <button class="position-btn active" data-position="top">頂部</button>
+                                    <button class="position-btn" data-position="middle">中間</button>
+                                    <button class="position-btn" data-position="bottom">底部</button>
+                                </div>
+                            </div>
+
+                            <!-- 顏色與背景 -->
+                            <div class="style-group">
+                                <div class="style-option">
+                                    <label>文字顏色</label>
+                                    <div class="color-buttons">
+                                        <button class="color-btn active" data-color="white">
+                                            <span class="color-preview white-text"></span>
+                                            白色
+                                        </button>
+                                        <button class="color-btn" data-color="black">
+                                            <span class="color-preview black-text"></span>
+                                            黑色
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="style-option">
+                                    <label>
+                                        <input type="checkbox" id="bgOverlayCheck" checked>
+                                        背景遮罩
+                                    </label>
+                                    <span class="hint">增加文字可讀性</span>
+                                </div>
+                            </div>
+
+                            <!-- 套用按鈕 -->
+                            <button id="applyTextBtn" class="apply-text-btn">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                套用文字
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 批量生成結果 -->
@@ -236,6 +306,7 @@
 
     <script src="{{ url_for('static', filename='js/templates.js') }}"></script>
     <script src="{{ url_for('static', filename='js/advanced.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/textOverlay.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

@@ -1259,3 +1259,247 @@ textarea::placeholder {
     color: var(--error-color);
     transform: scale(1.2);
 }
+
+/* ==================== 文字疊加編輯器 ==================== */
+.text-overlay-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.text-overlay-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    cursor: pointer;
+}
+
+.text-overlay-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.text-overlay-header .icon {
+    width: 20px;
+    height: 20px;
+    stroke: var(--primary-color);
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.toggle-btn:hover {
+    color: var(--primary-color);
+}
+
+.toggle-btn.rotated {
+    transform: rotate(180deg);
+}
+
+.text-editor-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* 文字輸入組 */
+.text-input-group {
+    position: relative;
+}
+
+.text-input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.text-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.text-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.text-counter {
+    position: absolute;
+    right: 0.5rem;
+    bottom: -1.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* 位置選擇 */
+.position-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.position-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.position-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.position-btn:hover {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.position-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* 顏色與樣式選項 */
+.style-group {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.style-option {
+    flex: 1;
+    min-width: 200px;
+}
+
+.style-option label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.color-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.color-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.color-btn:hover {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.color-btn.active {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.color-preview {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+}
+
+.color-preview.white-text {
+    background: white;
+}
+
+.color-preview.black-text {
+    background: black;
+}
+
+.style-option label input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.hint {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* 套用按鈕 */
+.apply-text-btn {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.apply-text-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.apply-text-btn:active {
+    transform: translateY(0);
+}
+
+.apply-text-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.apply-text-btn:disabled {
+    background: var(--border-color);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}

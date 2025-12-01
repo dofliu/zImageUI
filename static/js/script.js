@@ -137,6 +137,11 @@ function showHistoryImage(item) {
     currentFilename = item.filename;
 
     resultSection.style.display = 'block';
+
+    // 顯示文字疊加編輯器
+    if (typeof showTextOverlayEditor === 'function') {
+        showTextOverlayEditor(item.filename);
+    }
 }
 
 // 格式化日期
@@ -224,6 +229,11 @@ async function handleSingleGenerate() {
 
             loadingSection.style.display = 'none';
             resultSection.style.display = 'block';
+
+            // 顯示文字疊加編輯器
+            if (typeof showTextOverlayEditor === 'function') {
+                showTextOverlayEditor(data.filename);
+            }
 
             // 重新載入歷史記錄
             loadHistory();
@@ -472,6 +482,11 @@ function hideAllSections() {
     errorSection.style.display = 'none';
     welcomeSection.style.display = 'none';
     batchProgress.style.display = 'none';
+
+    // 隱藏文字疊加編輯器
+    if (typeof hideTextOverlayEditor === 'function') {
+        hideTextOverlayEditor();
+    }
 }
 
 // 支援 Enter 快速生成 (Shift+Enter 換行)

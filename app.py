@@ -10,6 +10,7 @@ import config  # 導入配置檔案
 import json
 import zipfile
 import tempfile
+from PIL import Image, ImageDraw, ImageFont
 
 app = Flask(__name__)
 
@@ -81,7 +82,7 @@ def initialize_model():
             low_cpu_mem_usage=True,
             cache_dir=cache_path,
             use_safetensors=True,
-            local_files_only=False,  # 允許從網路下載,但會優先使用本地快取
+            local_files_only=True,  # 允許從網路下載,但會優先使用本地快取
         )
 
         # 針對 12GB VRAM 的優化設定
@@ -613,6 +614,126 @@ def generate_with_seed():
         })
     except Exception as e:
         print(f"錯誤：{str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/add-text-overlay', methods=['POST'])
+def add_text_overlay():
+    """在圖片上添加文字疊加層"""
+    try:
+        data = request.get_json()
+        filename = data.get('filename', '')
+        text = data.get('text', '')
+        position = data.get('position', 'bottom')  # top, middle, bottom, custom
+        text_color = data.get('text_color', 'white')  # white, black
+        bg_overlay = data.get('bg_overlay', True)  # 背景遮罩
+        font_size = data.get('font_size', 48)  # 字體大小
+        custom_x = data.get('custom_x')  # 自定義 X 座標
+        custom_y = data.get('custom_y')  # 自定義 Y 座標
+
+        if not filename:
+            return jsonify({'error': '請提供圖片檔名'}), 400
+
+        if not text:
+            return jsonify({'error': '請輸入文字內容'}), 400
+
+        # 載入原圖
+        image_path = os.path.join(output_path, filename)
+        if not os.path.exists(image_path):
+            return jsonify({'error': '圖片檔案不存在'}), 404
+
+        image = Image.open(image_path)
+        draw = ImageDraw.Draw(image, 'RGBA')
+
+        # 嘗試載入中文字體（Windows 系統）
+        try:
+            # 常見的 Windows 中文字體路徑
+            font_paths = [
+                "C:/Windows/Fonts/msyh.ttc",  # 微軟雅黑
+                "C:/Windows/Fonts/msjh.ttc",  # 微軟正黑體
+                "C:/Windows/Fonts/simsun.ttc",  # 宋體
+                "C:/Windows/Fonts/simhei.ttf",  # 黑體
+            ]
+
+            font = None
+            for font_path in font_paths:
+                if os.path.exists(font_path):
+                    font = ImageFont.truetype(font_path, font_size)
+                    print(f"✓ 載入字體: {font_path}")
+                    break
+
+            if font is None:
+                # 使用預設字體
+                font = ImageFont.load_default()
+                print("⚠ 使用預設字體（不支援中文）")
+        except Exception as e:
+            print(f"字體載入錯誤: {e}")
+            font = ImageFont.load_default()
+
+        # 計算文字尺寸
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+
+        img_width, img_height = image.size
+
+        # 計算文字位置
+        if position == 'custom' and custom_x is not None and custom_y is not None:
+            x = custom_x
+            y = custom_y
+        else:
+            # 水平置中
+            x = (img_width - text_width) // 2
+
+            # 垂直位置
+            if position == 'top':
+                y = 50
+            elif position == 'middle':
+                y = (img_height - text_height) // 2
+            else:  # bottom
+                y = img_height - text_height - 50
+
+        # 繪製半透明背景遮罩
+        if bg_overlay:
+            padding = 20
+            overlay_color = (0, 0, 0, 180) if text_color == 'white' else (255, 255, 255, 180)
+            overlay_bbox = [
+                x - padding,
+                y - padding,
+                x + text_width + padding,
+                y + text_height + padding
+            ]
+            draw.rectangle(overlay_bbox, fill=overlay_color)
+
+        # 繪製文字
+        text_rgb = (255, 255, 255) if text_color == 'white' else (0, 0, 0)
+        draw.text((x, y), text, font=font, fill=text_rgb)
+
+        # 儲存新圖片
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        new_filename = f"text_overlay_{timestamp}.png"
+        new_save_path = os.path.join(output_path, new_filename)
+        image.save(new_save_path)
+        print(f"✓ 文字疊加圖片已儲存: {new_filename}")
+
+        # 添加到歷史記錄
+        add_to_history(f"文字疊加: {text}", new_filename)
+
+        # 轉換為 base64
+        buffered = BytesIO()
+        image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+
+        return jsonify({
+            'success': True,
+            'image': f"data:image/png;base64,{img_str}",
+            'filename': new_filename,
+            'original_filename': filename,
+            'text': text,
+            'message': '文字疊加完成'
+        })
+
+    except Exception as e:
+        print(f"文字疊加錯誤：{str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
