@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# 模型快取 (太大,不上傳)
+cache/
+models/
+
+# 生成的圖片 (可選擇性上傳或不上傳)
+generated_images/
+*.png
+*.jpg
+*.jpeg
+
+# 歷史記錄
+history.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 環境變數
+.env
+.env.local
+
+# 日誌
+*.log
