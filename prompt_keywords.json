@@ -1,0 +1,188 @@
+{
+  "subjects": [
+    "cat", "dog", "bird", "horse", "lion", "tiger", "elephant", "rabbit",
+    "person", "woman", "man", "child", "girl", "boy", "face", "portrait",
+    "landscape", "mountain", "ocean", "forest", "beach", "sunset", "sunrise",
+    "city", "building", "street", "bridge", "tower", "castle", "temple",
+    "flower", "tree", "garden", "rose", "lotus", "cherry blossom",
+    "car", "motorcycle", "bicycle", "train", "airplane", "ship",
+    "food", "fruit", "cake", "coffee", "tea", "sushi",
+    "robot", "dragon", "fairy", "angel", "demon", "warrior",
+    "space", "planet", "galaxy", "star", "moon", "nebula"
+  ],
+
+  "styles": [
+    "watercolor", "oil painting", "acrylic painting", "pencil sketch", "charcoal drawing",
+    "digital art", "concept art", "illustration", "comic style", "manga style", "anime style",
+    "photorealistic", "hyperrealistic", "realistic", "cinematic", "film photography",
+    "cyberpunk", "steampunk", "fantasy art", "sci-fi", "retro", "vintage",
+    "minimalist", "abstract", "impressionist", "expressionist", "surrealist",
+    "pixel art", "low poly", "3D render", "octane render", "unreal engine",
+    "art nouveau", "art deco", "baroque", "renaissance", "gothic",
+    "ink wash painting", "chinese painting", "japanese ukiyo-e", "persian miniature"
+  ],
+
+  "quality": [
+    "high quality", "best quality", "masterpiece", "professional",
+    "highly detailed", "extremely detailed", "ultra detailed", "intricate details",
+    "sharp focus", "crystal clear", "crisp", "vivid colors", "vibrant",
+    "4k", "8k", "uhd", "hdr", "raw photo",
+    "award winning", "trending on artstation", "featured on pixiv"
+  ],
+
+  "lighting": [
+    "soft lighting", "natural lighting", "studio lighting", "dramatic lighting",
+    "rim lighting", "back lighting", "side lighting", "golden hour lighting",
+    "volumetric lighting", "ambient lighting", "neon lighting", "cinematic lighting",
+    "warm lighting", "cool lighting", "moody lighting", "atmospheric lighting",
+    "sunlight", "moonlight", "candlelight", "firelight"
+  ],
+
+  "camera": [
+    "close-up", "medium shot", "wide angle", "panoramic", "aerial view",
+    "bird's eye view", "worm's eye view", "low angle", "high angle",
+    "over the shoulder", "first person view", "third person view",
+    "shallow depth of field", "bokeh", "macro photography", "tilt-shift",
+    "35mm", "50mm", "85mm", "portrait lens", "telephoto lens", "fisheye lens"
+  ],
+
+  "mood": [
+    "peaceful", "calm", "serene", "tranquil", "relaxing",
+    "dramatic", "epic", "majestic", "grand", "powerful",
+    "mysterious", "enigmatic", "ethereal", "dreamy", "magical",
+    "dark", "gloomy", "ominous", "haunting", "eerie",
+    "cheerful", "joyful", "happy", "bright", "colorful",
+    "melancholic", "nostalgic", "romantic", "emotional"
+  ],
+
+  "composition": [
+    "centered composition", "rule of thirds", "symmetrical", "asymmetrical",
+    "diagonal composition", "leading lines", "framing", "negative space",
+    "golden ratio", "dynamic composition", "balanced composition",
+    "foreground, midground, background", "layered composition"
+  ],
+
+  "negative_prompts": [
+    "blurry", "low quality", "worst quality", "normal quality",
+    "jpeg artifacts", "ugly", "deformed", "disfigured", "mutated",
+    "bad anatomy", "bad proportions", "extra limbs", "missing limbs",
+    "watermark", "signature", "text", "logo", "username",
+    "oversaturated", "undersaturated", "overexposed", "underexposed",
+    "amateur", "poorly drawn", "bad art", "gross", "mutilated"
+  ],
+
+  "templates": [
+    {
+      "id": "portrait_pro",
+      "name": "專業人像",
+      "category": "人物",
+      "prompt": "portrait of {subject}, professional photography, soft lighting, shallow depth of field, bokeh, high quality, 8k, sharp focus",
+      "placeholder": "a beautiful woman"
+    },
+    {
+      "id": "landscape_nature",
+      "name": "自然風景",
+      "category": "風景",
+      "prompt": "{subject}, natural lighting, golden hour, wide angle, highly detailed, vibrant colors, masterpiece, 8k",
+      "placeholder": "a mountain landscape"
+    },
+    {
+      "id": "concept_art",
+      "name": "概念藝術",
+      "category": "藝術",
+      "prompt": "{subject}, concept art, digital painting, dramatic lighting, highly detailed, trending on artstation, cinematic",
+      "placeholder": "a futuristic city"
+    },
+    {
+      "id": "anime_style",
+      "name": "動漫風格",
+      "category": "動漫",
+      "prompt": "{subject}, anime style, manga, vibrant colors, detailed, high quality, studio ghibli inspired",
+      "placeholder": "a magical girl"
+    },
+    {
+      "id": "watercolor",
+      "name": "水彩畫",
+      "category": "繪畫",
+      "prompt": "{subject}, watercolor painting, soft colors, delicate, artistic, traditional art, high quality",
+      "placeholder": "flowers in a garden"
+    },
+    {
+      "id": "cyberpunk",
+      "name": "賽博龐克",
+      "category": "科幻",
+      "prompt": "{subject}, cyberpunk style, neon lights, futuristic, dark atmosphere, highly detailed, 8k, cinematic",
+      "placeholder": "a hacker in a dark room"
+    },
+    {
+      "id": "fantasy",
+      "name": "奇幻風格",
+      "category": "奇幻",
+      "prompt": "{subject}, fantasy art, magical atmosphere, epic, dramatic lighting, highly detailed, masterpiece",
+      "placeholder": "a dragon"
+    },
+    {
+      "id": "minimalist",
+      "name": "極簡主義",
+      "category": "設計",
+      "prompt": "{subject}, minimalist style, clean, simple, modern, negative space, professional design",
+      "placeholder": "a coffee cup"
+    },
+    {
+      "id": "vintage",
+      "name": "復古風格",
+      "category": "風格",
+      "prompt": "{subject}, vintage style, retro, nostalgic, film photography, warm tones, grainy texture",
+      "placeholder": "an old street"
+    },
+    {
+      "id": "sci_fi",
+      "name": "科幻場景",
+      "category": "科幻",
+      "prompt": "{subject}, sci-fi, futuristic, advanced technology, dramatic lighting, highly detailed, 8k, cinematic",
+      "placeholder": "a space station"
+    },
+    {
+      "id": "macro",
+      "name": "微距攝影",
+      "category": "攝影",
+      "prompt": "{subject}, macro photography, extreme close-up, shallow depth of field, highly detailed, sharp focus, 8k",
+      "placeholder": "a water droplet"
+    },
+    {
+      "id": "food_photo",
+      "name": "美食攝影",
+      "category": "攝影",
+      "prompt": "{subject}, food photography, appetizing, professional lighting, high quality, sharp focus, commercial photography",
+      "placeholder": "a gourmet dish"
+    }
+  ],
+
+  "enhancement_rules": [
+    {
+      "pattern": "person|woman|man|girl|boy|portrait",
+      "add": ["sharp focus", "detailed face", "professional photography"],
+      "boost_quality": true
+    },
+    {
+      "pattern": "landscape|mountain|ocean|forest|nature",
+      "add": ["natural lighting", "wide angle", "vibrant colors"],
+      "boost_quality": true
+    },
+    {
+      "pattern": "art|painting|drawing",
+      "add": ["highly detailed", "masterpiece", "professional"],
+      "boost_quality": true
+    },
+    {
+      "pattern": "cyberpunk|sci-fi|futuristic",
+      "add": ["neon lights", "dramatic lighting", "cinematic"],
+      "boost_quality": true
+    },
+    {
+      "pattern": "anime|manga",
+      "add": ["vibrant colors", "detailed", "high quality"],
+      "boost_quality": true
+    }
+  ]
+}

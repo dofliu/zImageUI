@@ -64,14 +64,45 @@
                             <p class="seed-hint">💡 使用相同 Seed 和提示詞可重現完全相同的結果</p>
                         </div>
 
+                        <!-- 提示詞範本選擇器 -->
+                        <div class="prompt-template-selector">
+                            <label>提示詞範本（快速開始）</label>
+                            <div class="template-select-wrapper">
+                                <select id="promptTemplateSelect" class="template-select">
+                                    <option value="">選擇提示詞範本（可選）</option>
+                                </select>
+                                <button id="applyTemplateBtn" class="apply-template-btn" style="display: none;">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    應用
+                                </button>
+                            </div>
+                        </div>
+
                         <label for="prompt">請輸入您的圖片描述提示詞</label>
-                        <textarea
-                            id="prompt"
-                            placeholder="例如：一隻貓咪坐在窗邊，溫暖的陽光..."
-                            rows="4"
-                        ></textarea>
+                        <div class="prompt-input-wrapper">
+                            <textarea
+                                id="prompt"
+                                placeholder="例如：一隻貓咪坐在窗邊，溫暖的陽光... (輸入時會自動顯示建議)"
+                                rows="4"
+                            ></textarea>
+                            <!-- 自動完成建議框 -->
+                            <div id="promptSuggestions" class="prompt-suggestions" style="display: none;"></div>
+                        </div>
+
+                        <div class="prompt-assistant-controls">
+                            <button id="enhancePromptBtn" class="enhance-prompt-btn" title="自動增強提示詞">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 3v18M5.5 5.5l13 13M18.5 5.5l-13 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                增強提示詞
+                            </button>
+                            <span class="assistant-hint">💡 AI 助手會自動添加品質關鍵字</span>
+                        </div>
+
                         <div class="input-info">
-                            <span class="tip">💡 支援中英文混合描述</span>
+                            <span class="tip">💡 支援中英文混合描述 | 輸入時自動顯示建議</span>
                             <span class="char-count" id="charCount">0 字</span>
                         </div>
                     </div>
@@ -441,6 +472,7 @@
     <script src="{{ url_for('static', filename='js/advanced.js') }}"></script>
     <script src="{{ url_for('static', filename='js/textOverlay.js') }}"></script>
     <script src="{{ url_for('static', filename='js/exportManager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/promptAssistant.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
