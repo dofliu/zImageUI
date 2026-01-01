@@ -1,0 +1,22 @@
+# Z-Image-Turbo Web UI Dependencies
+# v2.5.0
+
+# PyTorch (安裝時需指定 CUDA 版本)
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Diffusers & Transformers
+diffusers>=0.21.0
+transformers>=4.30.0
+accelerate>=0.20.0
+
+# Web Framework
+flask>=2.3.0
+
+# Image Processing
+pillow>=10.0.0
+
+# Export Features
+reportlab>=4.0.0
+python-pptx>=0.6.21

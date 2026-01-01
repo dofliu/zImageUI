@@ -1,12 +1,12 @@
 # Z-Image-Turbo Web UI
 
-> **v2.4.0** - AI 圖片生成 Web 應用 | 提示詞智能助手
+> **v2.5.0** - AI 圖片生成 Web 應用 | 模組化架構
 
 基於 Flask 的專業 AI 圖片生成工具，使用 Z-Image-Turbo 模型，專為 12GB VRAM 優化。
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
-![Version](https://img.shields.io/badge/version-2.4.0-green.svg)
+![Version](https://img.shields.io/badge/version-2.5.0-green.svg)
 
 📚 **文檔導航**: [完整索引](DOCUMENTATION.md) | [快速參考](QUICK_REFERENCE.md) | [開發指南](DEVELOPMENT.md)
 
@@ -21,16 +21,16 @@
 - 📜 歷史記錄自動保存
 - 📥 批量下載 ZIP
 
-### 進階功能（v2.0-v2.4）
+### 進階功能（v2.0-v2.5）
 - 🔢 批量生成（最多 20 張）
 - 🎭 風格模板（50+ 種）
 - 📐 尺寸預設（15+ 種）
 - 🏷️ 標籤系統
 - 🎲 Seed 控制
-- 📝 文字疊加
 - 📦 批量導出（PDF/PPT）
 - 🗑️ 批量刪除
-- 🤖 **提示詞智能助手**（v2.4 新增）
+- 🤖 提示詞智能助手
+- 🏗️ **模組化架構**（v2.5 新增）
 
 ---
 
@@ -121,7 +121,6 @@ python app.py
 
 ### 進階
 - POST /seed-control - Seed 生成
-- POST /add-text-overlay - 文字疊加
 - POST /export-pdf - PDF 導出
 - POST /export-ppt - PPT 導出
 - POST /delete-images - 批量刪除
@@ -207,21 +206,26 @@ A: 使用 Seed 控制，相同 Seed + 提示詞 = 相同結果。
 
 ```
 zImage/
-├── app.py                      # Flask 主程式
+├── app.py                      # Flask 入口 (~50 行)
 ├── config.py                   # 配置
-├── templates.json              # 風格模板
-├── prompt_keywords.json        # 關鍵字庫
-├── DEVELOPMENT.md              # 開發文檔
-├── README.md                   # 本文件
+├── requirements.txt            # 依賴清單
+├── routes/                     # 路由模組
+│   ├── generate.py             # 生成路由
+│   ├── history.py              # 歷史路由
+│   ├── prompt.py               # 提示詞助手
+│   ├── export.py               # 導出路由
+│   └── templates.py            # 模板路由
+├── services/                   # 服務層
+│   ├── model_service.py        # 模型管理
+│   └── history_service.py      # 歷史管理
 ├── templates/
 │   └── index.html
 ├── static/
-│   ├── css/style.css          # 2200+ 行
+│   ├── css/style.css
 │   └── js/
 │       ├── script.js
 │       ├── templates.js
 │       ├── advanced.js
-│       ├── textOverlay.js
 │       ├── exportManager.js
 │       └── promptAssistant.js
 └── generated_images/
@@ -245,5 +249,5 @@ MIT License
 ---
 
 **開發**: Claude Code
-**版本**: v2.4.0
-**日期**: 2025-12-02
+**版本**: v2.5.0
+**日期**: 2026-01-02

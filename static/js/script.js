@@ -15,6 +15,9 @@ const downloadBtn = document.getElementById('downloadBtn');
 const retryBtn = document.getElementById('retryBtn');
 const historyList = document.getElementById('historyList');
 const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+const negativePromptInput = document.getElementById('negativePrompt');
+const toggleNegativePrompt = document.getElementById('toggleNegativePrompt');
+const negativePromptContent = document.getElementById('negativePromptContent');
 
 // 批量生成相關元素
 const singleModeBtn = document.getElementById('singleModeBtn');
@@ -51,6 +54,15 @@ if (promptInput && charCount) {
     promptInput.addEventListener('input', () => {
         const count = promptInput.value.length;
         charCount.textContent = `${count} 字`;
+    });
+}
+
+// 負面提示詞切換
+if (toggleNegativePrompt && negativePromptContent) {
+    toggleNegativePrompt.addEventListener('click', () => {
+        const isVisible = negativePromptContent.style.display !== 'none';
+        negativePromptContent.style.display = isVisible ? 'none' : 'block';
+        toggleNegativePrompt.classList.toggle('expanded', !isVisible);
     });
 }
 
@@ -247,6 +259,11 @@ async function handleSingleGenerate() {
             style_keywords: styleKeywords
         };
 
+        // 添加負面提示詞（如果有）
+        if (negativePromptInput && negativePromptInput.value.trim()) {
+            requestBody.negative_prompt = negativePromptInput.value.trim();
+        }
+
         // 如果有自定義尺寸，添加到請求
         if (sizeSettings) {
             requestBody.width = sizeSettings.width;
@@ -331,7 +348,8 @@ async function handleBatchGenerate() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                prompts: lines
+                prompts: lines,
+                negative_prompt: negativePromptInput ? negativePromptInput.value.trim() : ''
             }),
         });
 
