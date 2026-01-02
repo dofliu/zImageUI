@@ -54,118 +54,144 @@
 
                     <!-- 單張模式輸入 -->
                     <div id="singleModeInput" class="input-wrapper">
-                        <!-- 風格選擇器 -->
-                        <div class="style-selector">
-                            <label>風格模板（可選）</label>
-                            <select id="styleSelect" class="style-select">
-                                <option value="">無風格（使用原始提示詞）</option>
-                            </select>
-                            <button id="refreshStylesBtn" class="refresh-btn" title="刷新風格列表">⟳</button>
-                        </div>
-
-                        <!-- 尺寸選擇器 -->
-                        <div class="size-selector">
-                            <label>圖片尺寸</label>
-                            <select id="sizeSelect" class="size-select">
-                                <option value="default">預設尺寸 (768x768)</option>
-                            </select>
-                        </div>
-
-                        <!-- Seed 控制器 -->
-                        <div class="seed-control">
-                            <div class="seed-checkbox-wrapper">
-                                <input type="checkbox" id="useSeed" class="seed-checkbox">
-                                <label for="useSeed">使用固定種子（重現結果）</label>
+                        <!-- 1. 核心輸入區域 -->
+                        <div class="main-prompt-area">
+                            <label for="prompt">您想生成什麼樣的圖片？</label>
+                            <div class="prompt-input-wrapper">
+                                <textarea id="prompt" placeholder="例如：一隻貓咪坐在窗邊，溫暖的陽光... (輸入時會自動顯示建議)"
+                                    rows="4"></textarea>
+                                <!-- 自動完成建議框 -->
+                                <div id="promptSuggestions" class="prompt-suggestions" style="display: none;"></div>
                             </div>
-                            <div class="seed-input-wrapper">
-                                <input type="number" id="seedInput" class="seed-input" placeholder="輸入 Seed 或點擊隨機"
-                                    disabled min="0" max="4294967295">
-                                <button id="randomSeedBtn" class="random-seed-btn" title="生成隨機 Seed">🎲</button>
-                            </div>
-                            <p class="seed-hint">💡 使用相同 Seed 和提示詞可重現完全相同的結果</p>
-                        </div>
 
-                        <!-- 提示詞範本選擇器 -->
-                        <div class="prompt-template-selector">
-                            <label>提示詞範本（快速開始）</label>
-                            <div class="template-select-wrapper">
-                                <select id="promptTemplateSelect" class="template-select">
-                                    <option value="">選擇提示詞範本（可選）</option>
-                                </select>
-                                <button id="applyTemplateBtn" class="apply-template-btn" style="display: none;">
+                            <div class="prompt-assistant-controls">
+                                <button id="enhancePromptBtn" class="enhance-prompt-btn" title="增加細節與品質關鍵字">
                                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M12 3v18M5.5 5.5l13 13M18.5 5.5l-13 13" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
-                                    應用
+                                    增強提示詞
                                 </button>
+                                <button id="aiExpandPromptBtn" class="ai-expand-btn" title="由 AI 幫您擴展點子" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    🤖 AI 擴展
+                                </button>
+                                <div class="char-count-wrapper">
+                                    <span class="char-count" id="charCount">0 字</span>
+                                </div>
                             </div>
                         </div>
 
-                        <label for="prompt">請輸入您的圖片描述提示詞</label>
-                        <div class="prompt-input-wrapper">
-                            <textarea id="prompt" placeholder="例如：一隻貓咪坐在窗邊，溫暖的陽光... (輸入時會自動顯示建議)" rows="4"></textarea>
-                            <!-- 自動完成建議框 -->
-                            <div id="promptSuggestions" class="prompt-suggestions" style="display: none;"></div>
+                        <!-- 2. AI 助手設定 (緊湊版) -->
+                        <div class="llm-section compact">
+                            <div class="llm-header">
+                                <span class="llm-title">🤖 AI 助手設定</span>
+                                <span id="llmStatus" class="llm-status status-idle">未載入</span>
+                            </div>
+
+                            <div class="llm-controls-row">
+                                <div class="llm-model-group">
+                                    <select id="llmModelSelect" class="llm-select">
+                                        <option value="">選擇訓練模型</option>
+                                    </select>
+                                    <button id="loadLlmModelBtn" class="llm-load-btn" title="載入模型">⟳</button>
+                                    <button id="unloadLlmModelBtn" class="llm-unload-btn" title="卸載模型"
+                                        style="display: none;">✕</button>
+                                </div>
+                                <div class="llm-style-group">
+                                    <select id="llmStyleSelect" class="llm-style-select">
+                                        <option value="通用">風格：通用</option>
+                                        <option value="寫實攝影">風格：寫實</option>
+                                        <option value="動漫插畫">風格：動漫</option>
+                                        <option value="油畫藝術">風格：油畫</option>
+                                        <option value="賽博龐克">風格：龐克</option>
+                                        <option value="奇幻魔法">風格：奇幻</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="prompt-assistant-controls">
-                            <button id="enhancePromptBtn" class="enhance-prompt-btn" title="自動增強提示詞">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 3v18M5.5 5.5l13 13M18.5 5.5l-13 13" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                增強提示詞
-                            </button>
-                            <span class="assistant-hint">💡 AI 助手會自動添加品質關鍵字</span>
-                        </div>
-
-                        <div class="input-info">
-                            <span class="tip">💡 支援中英文混合描述 | 輸入時自動顯示建議</span>
-                            <span class="char-count" id="charCount">0 字</span>
-                        </div>
-
-                        <!-- 負面提示詞（可折疊） -->
-                        <div class="negative-prompt-section">
-                            <div class="negative-prompt-header" id="toggleNegativePrompt">
-                                <span>🚫 負面提示詞（可選）</span>
+                        <!-- 3. 進階參數設定 (預設折疊) -->
+                        <div class="advanced-settings-section">
+                            <div class="advanced-header" id="toggleAdvancedSettings">
+                                <span>⚙️ 進階參數與範本</span>
                                 <svg class="toggle-icon" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2"
                                         stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </div>
-                            <div class="negative-prompt-content" id="negativePromptContent" style="display: none;">
-                                <textarea id="negativePrompt"
-                                    placeholder="例如：blurry, low quality, ugly, deformed, extra limbs..."
-                                    rows="2"></textarea>
-                                <span class="negative-prompt-hint">排除不想要的元素</span>
-                            </div>
-                        </div>
 
-                        <!-- 提示詞收藏 -->
-                        <div class="favorites-section">
-                            <div class="favorites-header" id="toggleFavorites">
-                                <span>⭐ 收藏的提示詞</span>
-                                <div class="favorites-actions">
-                                    <button id="addFavoriteBtn" class="add-favorite-btn" title="收藏當前提示詞">
-                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round" />
-                                        </svg>
-                                    </button>
-                                    <svg class="toggle-icon" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
+                            <div class="advanced-content" id="advancedSettingsContent" style="display: none;">
+                                <!-- 風格選擇器 -->
+                                <div class="style-selector inner-setting">
+                                    <label>風格模板</label>
+                                    <div class="select-with-refresh">
+                                        <select id="styleSelect" class="style-select">
+                                            <option value="">無風格（使用原始提示詞）</option>
+                                        </select>
+                                        <button id="refreshStylesBtn" class="refresh-btn">⟳</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="favorites-content" id="favoritesContent" style="display: none;">
-                                <div id="favoritesList" class="favorites-list">
-                                    <p class="favorites-empty">尚無收藏的提示詞</p>
+
+                                <!-- 尺寸選擇器 -->
+                                <div class="size-selector inner-setting">
+                                    <label>圖片尺寸</label>
+                                    <select id="sizeSelect" class="size-select">
+                                        <option value="default">預設尺寸 (768x768)</option>
+                                    </select>
+                                </div>
+
+                                <!-- 提示詞範本 -->
+                                <div class="prompt-template-selector inner-setting">
+                                    <label>提示詞範本</label>
+                                    <div class="template-select-wrapper">
+                                        <select id="promptTemplateSelect" class="template-select">
+                                            <option value="">選擇範本...</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Seed 控制器 -->
+                                <div class="seed-control inner-setting">
+                                    <div class="seed-checkbox-wrapper">
+                                        <input type="checkbox" id="useSeed" class="seed-checkbox">
+                                        <label for="useSeed">固定隨機種子</label>
+                                    </div>
+                                    <div class="seed-input-wrapper">
+                                        <input type="number" id="seedInput" class="seed-input" placeholder="Seed 數值"
+                                            disabled>
+                                        <button id="randomSeedBtn" class="random-seed-btn">🎲</button>
+                                    </div>
+                                </div>
+
+                                <!-- 負面提示詞 -->
+                                <div class="negative-prompt-inner inner-setting">
+                                    <label>負面提示詞 (Negative Prompt)</label>
+                                    <textarea id="negativePrompt" placeholder="不想出現的元素..." rows="2"></textarea>
+                                </div>
+
+                                <!-- 收藏夾 -->
+                                <div class="favorites-inner inner-setting">
+                                    <div class="fav-header">
+                                        <label>收藏的提示詞</label>
+                                        <button id="addFavoriteBtn" class="add-favorite-btn" title="收藏當前">
+                                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div id="favoritesList" class="favorites-list mini">
+                                        <!-- 由 JS 動態填充 -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -510,6 +536,7 @@
     <script src="{{ url_for('static', filename='js/advanced.js') }}"></script>
     <script src="{{ url_for('static', filename='js/exportManager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/promptAssistant.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/llmManager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 

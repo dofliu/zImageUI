@@ -7,6 +7,7 @@ from routes.prompt import prompt_bp
 from routes.export import export_bp
 from routes.templates import templates_bp
 from routes.favorites import favorites_bp
+from routes.llm import llm_bp
 
 
 def register_blueprints(app):
@@ -17,3 +18,4 @@ def register_blueprints(app):
     app.register_blueprint(export_bp)
     app.register_blueprint(templates_bp)
     app.register_blueprint(favorites_bp)
+    app.register_blueprint(llm_bp)

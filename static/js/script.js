@@ -57,12 +57,15 @@ if (promptInput && charCount) {
     });
 }
 
-// 負面提示詞切換
-if (toggleNegativePrompt && negativePromptContent) {
-    toggleNegativePrompt.addEventListener('click', () => {
-        const isVisible = negativePromptContent.style.display !== 'none';
-        negativePromptContent.style.display = isVisible ? 'none' : 'block';
-        toggleNegativePrompt.classList.toggle('expanded', !isVisible);
+// 進階設定切換
+const toggleAdvancedSettings = document.getElementById('toggleAdvancedSettings');
+const advancedSettingsContent = document.getElementById('advancedSettingsContent');
+
+if (toggleAdvancedSettings && advancedSettingsContent) {
+    toggleAdvancedSettings.addEventListener('click', () => {
+        const isVisible = advancedSettingsContent.style.display !== 'none';
+        advancedSettingsContent.style.display = isVisible ? 'none' : 'grid';
+        toggleAdvancedSettings.classList.toggle('expanded', !isVisible);
     });
 }
 

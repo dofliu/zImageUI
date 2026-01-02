@@ -26,19 +26,45 @@ function renderFavoritesList(favorites) {
         return;
     }
 
-    container.innerHTML = favorites.map(fav => `
-        <div class="favorite-item" data-id="${fav.id}">
-            <div class="favorite-content" onclick="useFavorite('${fav.id}', '${escapeHtml(fav.prompt)}')">
-                <span class="favorite-name">${escapeHtml(fav.name)}</span>
-                <span class="favorite-count">使用 ${fav.use_count || 0} 次</span>
-            </div>
-            <button class="favorite-delete-btn" onclick="removeFavorite('${fav.id}')" title="移除收藏">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </button>
-        </div>
-    `).join('');
+    container.innerHTML = '';
+
+    favorites.forEach(fav => {
+        const item = document.createElement('div');
+        item.className = 'favorite-item';
+        item.dataset.id = fav.id;
+
+        const content = document.createElement('div');
+        content.className = 'favorite-content';
+        content.addEventListener('click', () => useFavorite(fav.id, fav.prompt));
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'favorite-name';
+        nameSpan.textContent = fav.name;
+
+        const countSpan = document.createElement('span');
+        countSpan.className = 'favorite-count';
+        countSpan.textContent = `使用 ${fav.use_count || 0} 次`;
+
+        content.appendChild(nameSpan);
+        content.appendChild(countSpan);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'favorite-delete-btn';
+        deleteBtn.title = '移除收藏';
+        deleteBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        `;
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeFavorite(fav.id);
+        });
+
+        item.appendChild(content);
+        item.appendChild(deleteBtn);
+        container.appendChild(item);
+    });
 }
 
 // 新增收藏
@@ -107,12 +133,6 @@ async function useFavorite(favoriteId, prompt) {
     } catch (error) {
         console.error('更新使用次數失敗:', error);
     }
-
-    // 收合收藏面板
-    const favoritesContent = document.getElementById('favoritesContent');
-    if (favoritesContent) {
-        favoritesContent.style.display = 'none';
-    }
 }
 
 // 更新收藏按鈕狀態
@@ -120,18 +140,6 @@ function updateFavoriteButton(isFavorited) {
     const btn = document.getElementById('addFavoriteBtn');
     if (btn) {
         btn.classList.toggle('favorited', isFavorited);
-    }
-}
-
-// 切換收藏面板
-function toggleFavoritesPanel() {
-    const content = document.getElementById('favoritesContent');
-    const header = document.getElementById('toggleFavorites');
-
-    if (content && header) {
-        const isVisible = content.style.display !== 'none';
-        content.style.display = isVisible ? 'none' : 'block';
-        header.classList.toggle('expanded', !isVisible);
     }
 }
 
@@ -145,12 +153,6 @@ function escapeHtml(text) {
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     loadFavorites();
-
-    // 綁定切換按鈕
-    const toggleBtn = document.getElementById('toggleFavorites');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', toggleFavoritesPanel);
-    }
 
     // 綁定收藏按鈕
     const addBtn = document.getElementById('addFavoriteBtn');
