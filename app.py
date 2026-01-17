@@ -6,12 +6,16 @@ AI 圖片生成 Web 應用
 """
 from flask import Flask, render_template
 import config
+from flask_cors import CORS  # 新增這行
+
 from routes import register_blueprints
 from services.model_service import get_model_service
 
 
 # 建立 Flask 應用
 app = Flask(__name__)
+CORS(app)  # 新增這行
+
 
 
 # 註冊所有路由藍圖

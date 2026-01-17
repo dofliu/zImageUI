@@ -24,9 +24,9 @@ class ModelService:
                 os.path.join(self.cache_path, "models--Tongyi-MAI--Z-Image-Turbo")
             )
             if model_cache_exists:
-                print("✓ 發現本地快取,從硬碟載入模型...")
+                print("[OK] 發現本地快取,從硬碟載入模型...")
             else:
-                print("✗ 未發現本地快取,將從 Hugging Face 下載模型 (這需要較長時間)...")
+                print("[!] 未發現本地快取,將從 Hugging Face 下載模型 (這需要較長時間)...")
 
             start_time = time.time()
 
@@ -36,11 +36,11 @@ class ModelService:
                 low_cpu_mem_usage=True,
                 cache_dir=self.cache_path,
                 use_safetensors=True,
-                local_files_only=True,
+                local_files_only=False,
             )
 
             # 針對 12GB VRAM 的優化設定
-            print("⟳ 啟用 Sequential CPU Offload (更激進的顯存優化)...")
+            print("[*] 啟用 Sequential CPU Offload (更激進的顯存優化)...")
             self.pipe.enable_sequential_cpu_offload()
             
             # 啟用額外的 VRAM 優化
@@ -71,13 +71,13 @@ class ModelService:
                         print(f"! xFormers 啟用失敗: {e}")
 
             if optimizations:
-                print(f"✓ 已啟用額外優化: {', '.join(optimizations)}")
+                print(f"[OK] 已啟用額外優化: {', '.join(optimizations)}")
 
             # 嘗試啟用 VAE Tiling
             try:
                 if hasattr(self.pipe, 'enable_vae_tiling'):
                     self.pipe.enable_vae_tiling()
-                    print("✓ 已啟用 VAE Tiling (優化高解析度生成)")
+                    print("[OK] 已啟用 VAE Tiling (優化高解析度生成)")
                 else:
                     print("! ZImagePipeline 不支援 VAE Tiling，跳過此優化")
             except Exception as e:
@@ -87,16 +87,16 @@ class ModelService:
             try:
                 if hasattr(self.pipe, 'transformer') and hasattr(self.pipe.transformer, 'set_attention_backend'):
                     self.pipe.transformer.set_attention_backend("flash")
-                    print("✓ 已啟用 Flash Attention 加速")
+                    print("[OK] 已啟用 Flash Attention 加速")
                 else:
                     print("! Flash Attention 不可用，使用預設 Attention")
             except Exception as e:
                 print(f"! Flash Attention 啟用失敗: {e}")
 
             elapsed_time = time.time() - start_time
-            print(f"✓ 模型載入完成! (耗時 {elapsed_time:.1f} 秒)")
+            print(f"[OK] 模型載入完成! (耗時 {elapsed_time:.1f} 秒)")
         else:
-            print("✓ 模型已在記憶體中,跳過載入")
+            print("[OK] 模型已在記憶體中,跳過載入")
     
     def generate_image(self, prompt, width, height, seed=None, negative_prompt=None):
         """生成圖片
@@ -117,7 +117,7 @@ class ModelService:
         # 生成前清理 GPU 快取
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-            print("✓ 已清理 GPU 快取")
+            print("[OK] 已清理 GPU 快取")
         
         # 使用隨機種子
         import random
