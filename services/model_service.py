@@ -19,31 +19,63 @@ class ModelService:
     def initialize_model(self):
         """初始化模型 (只執行一次)"""
         if self.pipe is None:
-            # 離線模式設定
-            if getattr(config, 'OFFLINE_MODE', False):
+            model_id = "Tongyi-MAI/Z-Image-Turbo"
+            model_folder_name = "models--" + model_id.replace("/", "--")
+            
+            # 優先檢查給定的或預設的快取路徑
+            expected_model_path = os.path.join(self.cache_path, model_folder_name)
+            
+            # 自動檢測是否使用離線模式
+            use_offline_mode = False
+            model_load_path = model_id # 預設使用 ID 下載
+            
+            model_cache_exists = os.path.exists(expected_model_path)
+            
+            if model_cache_exists:
+                print(f"[OK] 發現本地快取 ({expected_model_path})，自動啟用離線模式...")
+                use_offline_mode = True
+            else:
+                print(f"\n[!] 警告：未在 {self.cache_path} 發現模型快取。")
+                print("為避免不必要的網路下載或等待，請選擇接下來的操作：")
+                print("1. 允許連線下載 (將從 Hugging Face 下載多 GB 的模型，可能需要很久)")
+                print("2. 輸入我已經下載好的模型完整路徑 (例如: D:\\AI_Cache\\HuggingFace\\models--Tongyi-MAI--Z-Image-Turbo)")
+                print("3. 退出程式")
+                
+                choice = input("\n請輸入 1, 2 或 3: ").strip()
+                
+                if choice == '1':
+                    print("[*] 選擇連線下載，將嘗試從 Hugging Face 獲取...")
+                    use_offline_mode = False
+                elif choice == '2':
+                    custom_path = input("請輸入模型的完整資料夾路徑: ").strip()
+                    if os.path.exists(custom_path):
+                        print(f"[OK] 確認路徑存在，將從 {custom_path} 載入模型...")
+                        model_load_path = custom_path
+                        # 如果使用者提供的是絕對路徑，我們就當作 offline 處理
+                        use_offline_mode = True 
+                    else:
+                        print(f"[!] 錯誤：路徑 {custom_path} 不存在。程式即將退出。")
+                        exit(1)
+                else:
+                    print("程式已退出。")
+                    exit(0)
+
+            # 離線模式的環境變數設定
+            if use_offline_mode:
                 os.environ["HF_HUB_OFFLINE"] = "1"
                 os.environ["TRANSFORMERS_OFFLINE"] = "1"
                 os.environ["DIFFUSERS_OFFLINE"] = "1"
-                print("[*] 啟用離線模式，將跳過網路檢查...")
-
-            # 檢查本地快取是否存在
-            model_cache_exists = os.path.exists(
-                os.path.join(self.cache_path, "models--Tongyi-MAI--Z-Image-Turbo")
-            )
-            if model_cache_exists:
-                print("[OK] 發現本地快取,從硬碟載入模型...")
-            else:
-                print("[!] 未發現本地快取,將從 Hugging Face 下載模型 (這需要較長時間)...")
 
             start_time = time.time()
 
+            # 載入模型
             self.pipe = ZImagePipeline.from_pretrained(
-                "Tongyi-MAI/Z-Image-Turbo",
+                model_load_path,
                 torch_dtype=torch.bfloat16,
                 low_cpu_mem_usage=True,
                 cache_dir=self.cache_path,
                 use_safetensors=True,
-                local_files_only=getattr(config, 'OFFLINE_MODE', False),
+                local_files_only=use_offline_mode,
             )
 
             # 針對 12GB VRAM 的優化設定
