@@ -19,6 +19,13 @@ class ModelService:
     def initialize_model(self):
         """初始化模型 (只執行一次)"""
         if self.pipe is None:
+            # 離線模式設定
+            if getattr(config, 'OFFLINE_MODE', False):
+                os.environ["HF_HUB_OFFLINE"] = "1"
+                os.environ["TRANSFORMERS_OFFLINE"] = "1"
+                os.environ["DIFFUSERS_OFFLINE"] = "1"
+                print("[*] 啟用離線模式，將跳過網路檢查...")
+
             # 檢查本地快取是否存在
             model_cache_exists = os.path.exists(
                 os.path.join(self.cache_path, "models--Tongyi-MAI--Z-Image-Turbo")
@@ -36,7 +43,7 @@ class ModelService:
                 low_cpu_mem_usage=True,
                 cache_dir=self.cache_path,
                 use_safetensors=True,
-                local_files_only=False,
+                local_files_only=getattr(config, 'OFFLINE_MODE', False),
             )
 
             # 針對 12GB VRAM 的優化設定

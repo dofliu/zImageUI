@@ -50,6 +50,9 @@ CACHE_PATH = r"D:\AI_Cache\HuggingFace"
 # 生成圖片儲存路徑
 OUTPUT_PATH = r"d:\Dropbox\Project_CodingSimulation\aiAgent\zImage\generated_images"
 
+# 是否使用離線模式 (如果模型已下載，建議設為 True 避免網路連結錯誤)
+OFFLINE_MODE = True
+
 # ===========================
 # 伺服器設定
 # ===========================
