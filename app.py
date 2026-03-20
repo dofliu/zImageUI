@@ -1,21 +1,20 @@
 """
-Z-Image-Turbo Web UI - v2.5.0
-AI 圖片生成 Web 應用
+Z-Image Studio - v3.0.0
+AI 圖片生成平台
 
-重構版本 - 模組化架構
+產品化版本 - 多模型 / 圖生圖 / 作品集 / API
 """
 from flask import Flask, render_template
 import config
-from flask_cors import CORS  # 新增這行
+from flask_cors import CORS
 
 from routes import register_blueprints
-from services.model_service import get_model_service
+from services.model_registry import get_model_registry
 
 
 # 建立 Flask 應用
 app = Flask(__name__)
-CORS(app)  # 新增這行
-
+CORS(app)
 
 
 # 註冊所有路由藍圖
@@ -24,8 +23,20 @@ register_blueprints(app)
 
 @app.route('/')
 def index():
-    """首頁"""
+    """首頁 - 圖片生成器"""
     return render_template('index.html')
+
+
+@app.route('/api-docs')
+def api_docs():
+    """API 文件頁面"""
+    return render_template('api_docs.html')
+
+
+@app.route('/projects')
+def projects_page():
+    """專案管理頁面"""
+    return render_template('projects.html')
 
 
 if __name__ == '__main__':
@@ -35,16 +46,35 @@ if __name__ == '__main__':
     print(f"模型緩存路徑：{config.CACHE_PATH}")
     print(f"生成圖片儲存路徑：{config.OUTPUT_PATH}")
 
-    # 🚀 優化：在伺服器啟動時就預載入模型
+    # 初始化模型註冊表
     print("\n===================================")
-    print("正在預載入模型...")
+    print("Z-Image Studio v3.0.0")
     print("===================================")
-    model_service = get_model_service()
-    model_service.initialize_model()
-    print("✅ 模型已就緒！可以開始生成圖片了\n")
+    registry = get_model_registry()
 
-    print("正在啟動 Flask 伺服器...")
-    print(f"請在瀏覽器開啟: http://localhost:{config.PORT}")
+    # 自動載入預設模型 (Z-Image-Turbo)
+    print("正在預載入預設模型 (Z-Image-Turbo)...")
+    result = registry.switch_model("z-image-turbo")
+    if result['success']:
+        print(f"  {result['message']}")
+    else:
+        print(f"  預設模型載入失敗: {result.get('error', '未知錯誤')}")
+        print("  您可以在 UI 中手動選擇並載入其他模型")
+
+    print(f"\n已註冊 {len(registry.models)} 個模型:")
+    for mid, minfo in registry.models.items():
+        cached = "已快取" if minfo.get('is_cached') else "需下載"
+        print(f"  - {minfo['name']} ({cached})")
+
+    # 啟動佇列服務
+    from services.queue_service import get_queue_service
+    get_queue_service()
+
+    print(f"\n正在啟動 Flask 伺服器...")
+    print(f"  生成器:   http://localhost:{config.PORT}")
+    print(f"  作品集:   http://localhost:{config.PORT}/gallery")
+    print(f"  儀表板:   http://localhost:{config.PORT}/dashboard")
+    print(f"  API 文件: http://localhost:{config.PORT}/api-docs")
     print("===================================\n")
 
     # 關閉 reloader 避免生成過程中重新載入

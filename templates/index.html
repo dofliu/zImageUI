@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 圖片生成器 - Z-Image-Turbo</title>
+    <title>Z-Image Studio - AI 圖片生成平台</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
         rel="stylesheet">
@@ -22,9 +22,15 @@
                     <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round" />
                 </svg>
-                <h1>AI 圖片生成器</h1>
+                <h1>Z-Image Studio</h1>
             </div>
-            <p class="subtitle">由 Z-Image-Turbo 驅動</p>
+            <nav class="header-nav">
+                <a href="/" class="nav-link active">生成器</a>
+                <a href="/projects" class="nav-link">專案</a>
+                <a href="/gallery" class="nav-link">作品集</a>
+                <a href="/dashboard" class="nav-link">儀表板</a>
+                <a href="/api-docs" class="nav-link">API</a>
+            </nav>
 
             <!-- 主題切換按鈕 -->
             <button id="themeToggle" class="theme-toggle-btn" title="切換主題">
@@ -46,10 +52,19 @@
             <!-- 左側：輸入區域 -->
             <aside class="sidebar">
                 <div class="input-section">
+                    <!-- 模型選擇器 -->
+                    <div id="modelSelectorContainer" class="model-selector-container">
+                        <div class="model-selector-header">
+                            <span class="model-selector-label">AI 模型</span>
+                            <span class="model-selector-active">載入中...</span>
+                        </div>
+                    </div>
+
                     <!-- 模式切換 -->
                     <div class="mode-switch">
                         <button id="singleModeBtn" class="mode-btn active">單張生成</button>
                         <button id="batchModeBtn" class="mode-btn">批量生成</button>
+                        <button id="img2imgModeBtn" class="mode-btn">圖生圖</button>
                     </div>
 
                     <!-- 單張模式輸入 -->
@@ -209,6 +224,39 @@
                         </div>
                     </div>
 
+                    <!-- 圖生圖區域 -->
+                    <div id="img2imgSection" class="input-wrapper img2img-section" style="display: none;">
+                        <label>參考圖片</label>
+                        <div id="img2imgDropZone" class="img2img-drop-zone">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
+                                <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <p>拖放圖片到這裡，或點擊選擇</p>
+                            <span class="drop-zone-hint">支援 JPG、PNG、WebP（最大 20MB）</span>
+                        </div>
+                        <input type="file" id="img2imgFileInput" accept="image/*" style="display: none;">
+                        <div id="img2imgPreview" class="img2img-preview" style="display: none;"></div>
+                        <div id="img2imgControls" class="img2img-controls" style="display: none;">
+                            <div class="strength-control">
+                                <label for="img2imgStrength">
+                                    轉換強度: <span id="strengthValue">0.75</span>
+                                </label>
+                                <input type="range" id="img2imgStrength" min="0.1" max="1.0" step="0.05" value="0.75">
+                                <div class="strength-labels">
+                                    <span>微調</span>
+                                    <span>完全重繪</span>
+                                </div>
+                            </div>
+                            <div class="img2img-actions">
+                                <button id="clearReferenceBtn" class="clear-ref-btn">清除參考圖</button>
+                                <button id="generateVariationsBtn" class="variations-btn">生成 4 個變體</button>
+                            </div>
+                        </div>
+                        <div id="variationResults" class="variation-results" style="display: none;"></div>
+                    </div>
+
                     <button id="generateBtn" class="generate-btn">
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" stroke-width="2"
@@ -245,6 +293,35 @@
                     </div>
                     <div id="tagCloud" class="tag-cloud">
                         <p class="no-tags">尚無標籤</p>
+                    </div>
+                </div>
+
+                <!-- 提示詞庫 -->
+                <div class="prompt-library-section">
+                    <div class="pl-header" id="togglePromptLibrary">
+                        <h3>
+                            <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+                                <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M6.5 2H20V22H6.5A2.5 2.5 0 014 19.5V4.5A2.5 2.5 0 016.5 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            提示詞庫
+                        </h3>
+                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" width="18" height="18">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div id="promptLibraryPanel" class="pl-panel" style="display: none;">
+                        <div class="pl-controls">
+                            <input type="text" id="plSearch" class="pl-search" placeholder="搜尋提示詞...">
+                            <select id="plSort" class="pl-sort-select">
+                                <option value="rating">評分排序</option>
+                                <option value="use_count">使用次數</option>
+                                <option value="newest">最新</option>
+                            </select>
+                            <button id="plAddBtn" class="pl-add-btn" title="新增提示詞">+</button>
+                        </div>
+                        <div id="plCategories" class="pl-categories"></div>
+                        <div id="plGrid" class="pl-grid"></div>
                     </div>
                 </div>
 
@@ -358,6 +435,32 @@
                         <p class="filename" id="filename"></p>
                     </div>
 
+                    <!-- 快捷操作按鈕 -->
+                    <div class="result-actions">
+                        <div class="action-dropdown">
+                            <button id="addToProjectBtn" class="action-btn project-action-btn">
+                                <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2v11z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                加入專案
+                            </button>
+                            <div id="projectDropdown" class="dropdown-menu" style="display: none;">
+                                <!-- 動態填充專案列表 -->
+                            </div>
+                        </div>
+                        <div class="action-dropdown">
+                            <button id="addToGalleryBtn" class="action-btn gallery-action-btn">
+                                <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><path d="M21 15L16 10L5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                加入作品集
+                            </button>
+                            <div id="galleryDropdown" class="dropdown-menu" style="display: none;">
+                                <!-- 動態填充作品集列表 -->
+                            </div>
+                        </div>
+                        <button id="compareBtn" class="action-btn compare-action-btn">
+                            <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><rect x="2" y="3" width="8" height="18" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="8" height="18" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+                            比較
+                        </button>
+                    </div>
+
                 </div>
 
                 <!-- 批量生成結果 -->
@@ -404,19 +507,20 @@
                             d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    <h2>歡迎使用 AI 圖片生成器</h2>
-                    <p>在左側輸入提示詞，點擊生成按鈕即可開始創作</p>
+                    <h2>歡迎使用 Z-Image Studio</h2>
+                    <p>選擇 AI 模型，輸入提示詞，開始創作您的 AI 藝術</p>
                     <div class="welcome-features">
-                        <div class="feature">⚡ 快速生成 (5-8秒)</div>
-                        <div class="feature">🎨 高品質輸出 (768×768)</div>
-                        <div class="feature">📝 支援中英文</div>
+                        <div class="feature">⚡ 多模型支援</div>
+                        <div class="feature">🎨 圖生圖轉換</div>
+                        <div class="feature">🖼 作品集展示</div>
+                        <div class="feature">🔗 開放 API</div>
                     </div>
                 </div>
             </main>
         </div>
 
         <footer class="footer">
-            <p>使用 Z-Image-Turbo 模型 | Sequential CPU Offload 優化 | 解析度：768x768</p>
+            <p>Z-Image Studio | 多模型支援 | 圖生圖 | 作品集展示 | API 整合</p>
         </footer>
     </div>
 
@@ -530,6 +634,23 @@
         </div>
     </div>
 
+    <!-- 圖片比較疊層 -->
+    <div id="compareOverlay" class="compare-overlay" style="display: none;">
+        <div class="compare-header">
+            <h2>圖片比較</h2>
+            <button id="closeCompareBtn" class="modal-close-btn">✕</button>
+        </div>
+        <div class="compare-container">
+            <div class="compare-slot" id="compareSlotA">
+                <p class="compare-hint">從歷史記錄拖放或點擊選擇圖片 A</p>
+            </div>
+            <div class="compare-divider"></div>
+            <div class="compare-slot" id="compareSlotB">
+                <p class="compare-hint">從歷史記錄拖放或點擊選擇圖片 B</p>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/themeManager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/favorites.js') }}"></script>
     <script src="{{ url_for('static', filename='js/templates.js') }}"></script>
@@ -537,7 +658,58 @@
     <script src="{{ url_for('static', filename='js/exportManager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/promptAssistant.js') }}"></script>
     <script src="{{ url_for('static', filename='js/llmManager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modelSelector.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/img2imgManager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/actionButtons.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/promptLibrary.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+    <!-- 新增提示詞對話框 -->
+    <div id="plAddDialog" class="modal-overlay" style="display: none;">
+        <div class="modal-content pl-add-modal">
+            <div class="modal-header">
+                <h2>新增提示詞到庫</h2>
+                <button id="plCancelBtn" class="modal-close-btn">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-option-group">
+                    <label for="plNewTitle">標題</label>
+                    <input type="text" id="plNewTitle" class="export-input" placeholder="例如：夢幻城堡">
+                </div>
+                <div class="export-option-group">
+                    <label for="plNewPrompt">提示詞</label>
+                    <textarea id="plNewPrompt" rows="3" placeholder="輸入完整的提示詞..."></textarea>
+                </div>
+                <div class="export-option-group">
+                    <label for="plNewNeg">負面提示詞（選填）</label>
+                    <textarea id="plNewNeg" rows="2" placeholder="不想出現的元素..."></textarea>
+                </div>
+                <div class="export-option-group">
+                    <label for="plNewCategory">分類</label>
+                    <select id="plNewCategory" class="export-input">
+                        <option value="custom">自訂</option>
+                        <option value="fantasy">奇幻魔法</option>
+                        <option value="scifi">科幻未來</option>
+                        <option value="art">藝術繪畫</option>
+                        <option value="photography">攝影寫實</option>
+                        <option value="anime">動漫插畫</option>
+                        <option value="architecture">建築概念</option>
+                        <option value="portrait">人物肖像</option>
+                        <option value="landscape">風景自然</option>
+                        <option value="abstract">抽象藝術</option>
+                    </select>
+                </div>
+                <div class="export-option-group">
+                    <label for="plNewTags">標籤（逗號分隔）</label>
+                    <input type="text" id="plNewTags" class="export-input" placeholder="例如：森林, 魔法, 夜晚">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="document.getElementById('plAddDialog').style.display='none'">取消</button>
+                <button id="plSaveBtn" class="modal-btn confirm-btn">儲存到提示詞庫</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

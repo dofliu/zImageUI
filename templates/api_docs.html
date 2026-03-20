@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 文件 - Z-Image Studio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/api-docs.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="api-docs-body">
+    <header class="docs-header">
+        <div class="docs-header-content">
+            <div class="docs-logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <h1>Z-Image Studio API</h1>
+                <span class="version-badge">v1</span>
+            </div>
+            <nav class="docs-nav">
+                <a href="/" class="nav-link">生成器</a>
+                <a href="/gallery" class="nav-link">作品集</a>
+                <a href="/dashboard" class="nav-link">儀表板</a>
+                <a href="/api-docs" class="nav-link active">API 文件</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="docs-layout">
+        <!-- 側邊目錄 -->
+        <aside class="docs-sidebar">
+            <nav class="docs-toc">
+                <h4>快速開始</h4>
+                <a href="#auth" class="toc-link">認證方式</a>
+                <a href="#quickstart" class="toc-link">快速上手</a>
+
+                <h4>API 端點</h4>
+                <a href="#generate" class="toc-link">POST /api/v1/generate</a>
+                <a href="#history" class="toc-link">GET /api/v1/history</a>
+                <a href="#models" class="toc-link">GET /api/v1/models</a>
+                <a href="#queue-submit" class="toc-link">POST /api/queue/submit</a>
+                <a href="#queue-status" class="toc-link">GET /api/queue/status</a>
+
+                <h4>資源管理</h4>
+                <a href="#keys" class="toc-link">API 金鑰管理</a>
+                <a href="#projects" class="toc-link">專案管理</a>
+                <a href="#galleries" class="toc-link">作品集管理</a>
+
+                <h4>參考</h4>
+                <a href="#errors" class="toc-link">錯誤碼</a>
+                <a href="#rate-limits" class="toc-link">速率限制</a>
+            </nav>
+        </aside>
+
+        <!-- 主要內容 -->
+        <main class="docs-main">
+            <!-- 認證 -->
+            <section id="auth" class="docs-section">
+                <h2>認證方式</h2>
+                <p>所有 <code>/api/v1/</code> 端點需要 API 金鑰認證。您可以在<a href="/dashboard">儀表板</a>建立金鑰。</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>HTTP Header</span>
+                    </div>
+                    <pre><code>X-API-Key: zimg_your_api_key_here</code></pre>
+                </div>
+                <p>或使用 Query Parameter：</p>
+                <div class="code-block">
+                    <div class="code-header"><span>Query Parameter</span></div>
+                    <pre><code>GET /api/v1/history?api_key=zimg_your_api_key_here</code></pre>
+                </div>
+            </section>
+
+            <!-- 快速上手 -->
+            <section id="quickstart" class="docs-section">
+                <h2>快速上手</h2>
+                <p>使用 cURL 生成第一張圖片：</p>
+                <div class="code-block">
+                    <div class="code-header"><span>cURL</span><button class="copy-btn" data-target="curl-example">複製</button></div>
+                    <pre id="curl-example"><code>curl -X POST http://localhost:5000/api/v1/generate \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -d '{
+    "prompt": "a beautiful sunset over mountains, digital art",
+    "width": 768,
+    "height": 768
+  }'</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header"><span>Python</span><button class="copy-btn" data-target="python-example">複製</button></div>
+                    <pre id="python-example"><code>import requests
+
+response = requests.post(
+    "http://localhost:5000/api/v1/generate",
+    headers={"X-API-Key": "YOUR_API_KEY"},
+    json={
+        "prompt": "a beautiful sunset over mountains",
+        "width": 768,
+        "height": 768,
+        "output_format": "url"
+    }
+)
+
+data = response.json()
+print(f"Image: {data['image_url']}")
+print(f"Seed: {data['seed']}")</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header"><span>JavaScript</span><button class="copy-btn" data-target="js-example">複製</button></div>
+                    <pre id="js-example"><code>const response = await fetch('/api/v1/generate', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-Key': 'YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    prompt: 'a beautiful sunset over mountains',
+    width: 768,
+    height: 768
+  })
+});
+
+const data = await response.json();
+console.log(data.filename, data.seed);</code></pre>
+                </div>
+            </section>
+
+            <!-- Generate -->
+            <section id="generate" class="docs-section">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <code class="endpoint-url">/api/v1/generate</code>
+                </div>
+                <p>生成一張 AI 圖片。</p>
+
+                <h4>Request Body</h4>
+                <table class="params-table">
+                    <thead><tr><th>參數</th><th>類型</th><th>必填</th><th>說明</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>prompt</code></td><td>string</td><td>是</td><td>圖片描述提示詞</td></tr>
+                        <tr><td><code>negative_prompt</code></td><td>string</td><td>否</td><td>負面提示詞</td></tr>
+                        <tr><td><code>width</code></td><td>integer</td><td>否</td><td>圖片寬度 (預設 768)</td></tr>
+                        <tr><td><code>height</code></td><td>integer</td><td>否</td><td>圖片高度 (預設 768)</td></tr>
+                        <tr><td><code>seed</code></td><td>integer</td><td>否</td><td>隨機種子（重現結果）</td></tr>
+                        <tr><td><code>model</code></td><td>string</td><td>否</td><td>指定模型 ID</td></tr>
+                        <tr><td><code>output_format</code></td><td>string</td><td>否</td><td><code>base64</code> (預設) 或 <code>url</code></td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Response</h4>
+                <div class="code-block">
+                    <div class="code-header"><span>200 OK</span></div>
+                    <pre><code>{
+  "success": true,
+  "filename": "api_20260320_143022.png",
+  "prompt": "a beautiful sunset",
+  "seed": 1234567890,
+  "width": 768,
+  "height": 768,
+  "model": "z-image-turbo",
+  "image": "data:image/png;base64,..."
+}</code></pre>
+                </div>
+            </section>
+
+            <!-- History -->
+            <section id="history" class="docs-section">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code class="endpoint-url">/api/v1/history</code>
+                </div>
+                <p>取得歷史生成記錄。</p>
+
+                <h4>Query Parameters</h4>
+                <table class="params-table">
+                    <thead><tr><th>參數</th><th>類型</th><th>說明</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>limit</code></td><td>integer</td><td>回傳數量 (預設 50)</td></tr>
+                        <tr><td><code>offset</code></td><td>integer</td><td>分頁偏移量 (預設 0)</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Models -->
+            <section id="models" class="docs-section">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code class="endpoint-url">/api/v1/models</code>
+                </div>
+                <p>列出所有可用的 AI 模型。</p>
+            </section>
+
+            <!-- Queue -->
+            <section id="queue-submit" class="docs-section">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <code class="endpoint-url">/api/queue/submit</code>
+                </div>
+                <p>提交生成任務到非同步佇列。適合批量生成或長時間運算。</p>
+
+                <h4>Request Body</h4>
+                <div class="code-block">
+                    <pre><code>{
+  "type": "generate",
+  "priority": 0,
+  "params": {
+    "prompt": "a cat in space",
+    "width": 1024,
+    "height": 1024,
+    "project_id": "abc12345"
+  }
+}</code></pre>
+                </div>
+
+                <h4>Response</h4>
+                <div class="code-block">
+                    <pre><code>{
+  "success": true,
+  "task": {
+    "id": "a1b2c3d4e5f6",
+    "status": "pending",
+    "created_at": "2026-03-20T14:30:22"
+  }
+}</code></pre>
+                </div>
+                <p>使用 <code>GET /api/queue/task/{task_id}</code> 輪詢任務狀態。</p>
+            </section>
+
+            <section id="queue-status" class="docs-section">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code class="endpoint-url">/api/queue/status</code>
+                </div>
+                <p>取得佇列目前狀態。</p>
+            </section>
+
+            <!-- Keys -->
+            <section id="keys" class="docs-section">
+                <h2>API 金鑰管理</h2>
+                <table class="params-table">
+                    <thead><tr><th>端點</th><th>說明</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>GET /api/v1/keys</code></td><td>列出所有金鑰</td></tr>
+                        <tr><td><code>POST /api/v1/keys</code></td><td>建立新金鑰</td></tr>
+                        <tr><td><code>DELETE /api/v1/keys/{id}</code></td><td>刪除金鑰</td></tr>
+                        <tr><td><code>POST /api/v1/keys/{id}/revoke</code></td><td>撤銷金鑰</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Projects -->
+            <section id="projects" class="docs-section">
+                <h2>專案管理</h2>
+                <table class="params-table">
+                    <thead><tr><th>端點</th><th>說明</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>GET /api/projects</code></td><td>列出所有專案</td></tr>
+                        <tr><td><code>POST /api/projects</code></td><td>建立新專案</td></tr>
+                        <tr><td><code>GET /api/projects/{id}</code></td><td>取得專案詳情</td></tr>
+                        <tr><td><code>PUT /api/projects/{id}</code></td><td>更新專案</td></tr>
+                        <tr><td><code>DELETE /api/projects/{id}</code></td><td>刪除專案</td></tr>
+                        <tr><td><code>POST /api/projects/{id}/images</code></td><td>加入圖片</td></tr>
+                        <tr><td><code>PUT /api/projects/{id}/images/{filename}/rate</code></td><td>評分圖片 (1-5)</td></tr>
+                        <tr><td><code>GET /api/projects/{id}/stats</code></td><td>專案統計</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Galleries -->
+            <section id="galleries" class="docs-section">
+                <h2>作品集管理</h2>
+                <table class="params-table">
+                    <thead><tr><th>端點</th><th>說明</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>GET /api/galleries</code></td><td>列出所有作品集</td></tr>
+                        <tr><td><code>POST /api/galleries</code></td><td>建立作品集</td></tr>
+                        <tr><td><code>GET /api/galleries/{id}</code></td><td>取得作品集</td></tr>
+                        <tr><td><code>PUT /api/galleries/{id}</code></td><td>更新作品集</td></tr>
+                        <tr><td><code>POST /api/galleries/{id}/images</code></td><td>加入圖片</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Errors -->
+            <section id="errors" class="docs-section">
+                <h2>錯誤碼</h2>
+                <table class="params-table">
+                    <thead><tr><th>HTTP Status</th><th>Code</th><th>說明</th></tr></thead>
+                    <tbody>
+                        <tr><td>401</td><td><code>MISSING_API_KEY</code></td><td>未提供 API 金鑰</td></tr>
+                        <tr><td>401</td><td><code>INVALID_API_KEY</code></td><td>無效的 API 金鑰</td></tr>
+                        <tr><td>403</td><td><code>INSUFFICIENT_PERMISSIONS</code></td><td>金鑰權限不足</td></tr>
+                        <tr><td>503</td><td>-</td><td>模型尚未載入</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Rate Limits -->
+            <section id="rate-limits" class="docs-section">
+                <h2>速率限制</h2>
+                <p>每個 API 金鑰預設限制為每分鐘 60 次請求。超過限制將回傳 <code>429 Too Many Requests</code>。</p>
+                <p>可在金鑰建立時自訂限制額度。</p>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // 複製按鈕功能
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.dataset.target;
+                const code = document.getElementById(targetId)?.textContent;
+                if (code) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        btn.textContent = '已複製!';
+                        setTimeout(() => btn.textContent = '複製', 2000);
+                    });
+                }
+            });
+        });
+
+        // 側邊欄高亮
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
+                    const link = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+                    if (link) link.classList.add('active');
+                }
+            });
+        }, { threshold: 0.3 });
+
+        document.querySelectorAll('.docs-section').forEach(s => observer.observe(s));
+    </script>
+</body>
+
+</html>

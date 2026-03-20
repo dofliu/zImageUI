@@ -2,13 +2,15 @@
 Generate Routes - 圖片生成相關路由
 """
 import os
+import time
 import base64
 from io import BytesIO
 from datetime import datetime
 from flask import Blueprint, request, jsonify
 import config
-from services.model_service import get_model_service
+from services.model_registry import get_model_registry
 from services.history_service import get_history_service
+from services.analytics_service import get_analytics_service
 
 
 generate_bp = Blueprint('generate', __name__)
@@ -38,15 +40,20 @@ def generate_image():
         width = custom_width if custom_width else config.IMAGE_WIDTH
         height = custom_height if custom_height else config.IMAGE_HEIGHT
 
-        # 使用模型服務生成圖片
-        model_service = get_model_service()
+        # 使用模型註冊表生成圖片
+        registry = get_model_registry()
+        if registry.active_pipeline is None:
+            return jsonify({'error': '尚未載入模型，請先在模型選擇器中選擇一個模型'}), 503
+
         if style_keywords:
             print(f"風格: {style_keywords}")
-        
-        image, seed = model_service.generate_image(
-            full_prompt, width, height, 
+
+        start_time = time.time()
+        image, seed = registry.generate(
+            full_prompt, width, height,
             negative_prompt=negative_prompt if negative_prompt else None
         )
+        duration = time.time() - start_time
 
         # 生成帶有日期時間的檔案名稱
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -60,6 +67,12 @@ def generate_image():
         # 添加到歷史記錄
         history_service = get_history_service()
         history_service.add_to_history(prompt, filename)
+
+        # 追蹤統計
+        get_analytics_service().track_generation(
+            registry.active_model_id, prompt, width, height,
+            mode='single', duration=round(duration, 2)
+        )
 
         # 將圖片轉換為 base64 以便在網頁上顯示
         buffered = BytesIO()
@@ -95,8 +108,11 @@ def batch_generate():
         if len(prompts) > max_batch:
             return jsonify({'error': f'批量生成最多支援 {max_batch} 張圖片'}), 400
 
-        model_service = get_model_service()
+        registry = get_model_registry()
         history_service = get_history_service()
+
+        if registry.active_pipeline is None:
+            return jsonify({'error': '尚未載入模型，請先在模型選擇器中選擇一個模型'}), 503
 
         results = []
         failed_prompts = []
@@ -112,7 +128,7 @@ def batch_generate():
                 print(f"\n[{idx}/{len(prompts)}] 生成：{prompt}")
 
                 # 生成圖片
-                image, seed = model_service.generate_image(
+                image, seed = registry.generate(
                     prompt, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
                     negative_prompt=negative_prompt if negative_prompt else None
                 )
@@ -202,15 +218,18 @@ def generate_with_seed():
         width = custom_width if custom_width else config.IMAGE_WIDTH
         height = custom_height if custom_height else config.IMAGE_HEIGHT
 
-        # 使用模型服務生成圖片
-        model_service = get_model_service()
+        # 使用模型註冊表生成圖片
+        registry = get_model_registry()
         history_service = get_history_service()
-        
+
+        if registry.active_pipeline is None:
+            return jsonify({'error': '尚未載入模型，請先在模型選擇器中選擇一個模型'}), 503
+
         print(f"開始生成（固定種子）：{full_prompt}")
         print(f"種子: {seed}")
         print(f"解析度: {width}x{height}")
 
-        image, _ = model_service.generate_image(
+        image, _ = registry.generate(
             full_prompt, width, height, seed,
             negative_prompt=negative_prompt if negative_prompt else None
         )
