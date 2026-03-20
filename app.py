@@ -33,6 +33,12 @@ def api_docs():
     return render_template('api_docs.html')
 
 
+@app.route('/projects')
+def projects_page():
+    """專案管理頁面"""
+    return render_template('projects.html')
+
+
 if __name__ == '__main__':
     # 顯示配置資訊
     config.print_config_info()

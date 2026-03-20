@@ -15,6 +15,7 @@ from routes.api import api_bp
 from routes.dashboard import dashboard_bp
 from routes.projects import projects_bp
 from routes.queue import queue_bp
+from routes.prompt_library import prompt_library_bp
 
 
 def register_blueprints(app):
@@ -33,3 +34,4 @@ def register_blueprints(app):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(projects_bp)
     app.register_blueprint(queue_bp)
+    app.register_blueprint(prompt_library_bp)
