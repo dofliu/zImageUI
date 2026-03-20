@@ -27,6 +27,12 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/api-docs')
+def api_docs():
+    """API 文件頁面"""
+    return render_template('api_docs.html')
+
+
 if __name__ == '__main__':
     # 顯示配置資訊
     config.print_config_info()
@@ -54,10 +60,15 @@ if __name__ == '__main__':
         cached = "已快取" if minfo.get('is_cached') else "需下載"
         print(f"  - {minfo['name']} ({cached})")
 
+    # 啟動佇列服務
+    from services.queue_service import get_queue_service
+    get_queue_service()
+
     print(f"\n正在啟動 Flask 伺服器...")
-    print(f"  生成器: http://localhost:{config.PORT}")
-    print(f"  作品集: http://localhost:{config.PORT}/gallery")
-    print(f"  API 文件: http://localhost:{config.PORT}/api/v1/")
+    print(f"  生成器:   http://localhost:{config.PORT}")
+    print(f"  作品集:   http://localhost:{config.PORT}/gallery")
+    print(f"  儀表板:   http://localhost:{config.PORT}/dashboard")
+    print(f"  API 文件: http://localhost:{config.PORT}/api-docs")
     print("===================================\n")
 
     # 關閉 reloader 避免生成過程中重新載入

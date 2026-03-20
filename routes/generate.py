@@ -2,6 +2,7 @@
 Generate Routes - 圖片生成相關路由
 """
 import os
+import time
 import base64
 from io import BytesIO
 from datetime import datetime
@@ -9,6 +10,7 @@ from flask import Blueprint, request, jsonify
 import config
 from services.model_registry import get_model_registry
 from services.history_service import get_history_service
+from services.analytics_service import get_analytics_service
 
 
 generate_bp = Blueprint('generate', __name__)
@@ -46,10 +48,12 @@ def generate_image():
         if style_keywords:
             print(f"風格: {style_keywords}")
 
+        start_time = time.time()
         image, seed = registry.generate(
             full_prompt, width, height,
             negative_prompt=negative_prompt if negative_prompt else None
         )
+        duration = time.time() - start_time
 
         # 生成帶有日期時間的檔案名稱
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -63,6 +67,12 @@ def generate_image():
         # 添加到歷史記錄
         history_service = get_history_service()
         history_service.add_to_history(prompt, filename)
+
+        # 追蹤統計
+        get_analytics_service().track_generation(
+            registry.active_model_id, prompt, width, height,
+            mode='single', duration=round(duration, 2)
+        )
 
         # 將圖片轉換為 base64 以便在網頁上顯示
         buffered = BytesIO()
