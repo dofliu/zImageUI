@@ -77,26 +77,32 @@ if (batchPrompts && batchCount) {
     });
 }
 
-// 模式切換
-if (singleModeBtn && batchModeBtn) {
-    singleModeBtn.addEventListener('click', () => {
-        currentMode = 'single';
-        singleModeBtn.classList.add('active');
-        batchModeBtn.classList.remove('active');
-        if (singleModeInput) singleModeInput.style.display = 'block';
-        if (batchModeInput) batchModeInput.style.display = 'none';
-        if (btnText) btnText.textContent = '開始生成圖片';
-    });
+// img2img 相關元素
+const img2imgModeBtn = document.getElementById('img2imgModeBtn');
+const img2imgSection = document.getElementById('img2imgSection');
 
-    batchModeBtn.addEventListener('click', () => {
-        currentMode = 'batch';
-        batchModeBtn.classList.add('active');
-        singleModeBtn.classList.remove('active');
-        if (singleModeInput) singleModeInput.style.display = 'none';
-        if (batchModeInput) batchModeInput.style.display = 'block';
-        if (btnText) btnText.textContent = '開始批量生成';
-    });
+// 模式切換
+function switchToMode(mode) {
+    currentMode = mode;
+
+    // 更新按鈕狀態
+    if (singleModeBtn) singleModeBtn.classList.toggle('active', mode === 'single');
+    if (batchModeBtn) batchModeBtn.classList.toggle('active', mode === 'batch');
+    if (img2imgModeBtn) img2imgModeBtn.classList.toggle('active', mode === 'img2img');
+
+    // 顯示/隱藏區域
+    if (singleModeInput) singleModeInput.style.display = mode === 'single' ? 'block' : (mode === 'img2img' ? 'block' : 'none');
+    if (batchModeInput) batchModeInput.style.display = mode === 'batch' ? 'block' : 'none';
+    if (img2imgSection) img2imgSection.style.display = mode === 'img2img' ? 'block' : 'none';
+
+    // 更新按鈕文字
+    const textMap = { single: '開始生成圖片', batch: '開始批量生成', img2img: '開始圖生圖' };
+    if (btnText) btnText.textContent = textMap[mode] || '開始生成圖片';
 }
+
+if (singleModeBtn) singleModeBtn.addEventListener('click', () => switchToMode('single'));
+if (batchModeBtn) batchModeBtn.addEventListener('click', () => switchToMode('batch'));
+if (img2imgModeBtn) img2imgModeBtn.addEventListener('click', () => switchToMode('img2img'));
 
 // 載入歷史記錄
 async function loadHistory() {
@@ -227,12 +233,86 @@ if (generateBtn) {
     generateBtn.addEventListener('click', async () => {
         if (currentMode === 'batch') {
             await handleBatchGenerate();
+        } else if (currentMode === 'img2img') {
+            await handleImg2ImgGenerate();
         } else {
             await handleSingleGenerate();
         }
     });
 } else {
     console.error('生成按鈕未找到！');
+}
+
+// 圖生圖生成處理
+async function handleImg2ImgGenerate() {
+    const prompt = promptInput.value.trim();
+    if (!prompt) {
+        showError('請輸入圖片描述提示詞');
+        return;
+    }
+
+    if (!window.Img2Img || !window.Img2Img.hasReference()) {
+        showError('請先上傳參考圖片');
+        return;
+    }
+
+    hideAllSections();
+    loadingSection.style.display = 'flex';
+    generateBtn.disabled = true;
+    btnText.textContent = '圖生圖生成中...';
+
+    try {
+        const strengthSlider = document.getElementById('img2imgStrength');
+        const strength = strengthSlider ? parseFloat(strengthSlider.value) : 0.75;
+
+        const styleKeywords = typeof getSelectedStyle === 'function' ? getSelectedStyle() : '';
+        const sizeSettings = typeof getSelectedSize === 'function' ? getSelectedSize() : null;
+
+        const requestBody = {
+            image: window.Img2Img.getReferenceImage(),
+            prompt: prompt,
+            strength: strength,
+            style_keywords: styleKeywords
+        };
+
+        if (negativePromptInput && negativePromptInput.value.trim()) {
+            requestBody.negative_prompt = negativePromptInput.value.trim();
+        }
+
+        if (sizeSettings) {
+            requestBody.width = sizeSettings.width;
+            requestBody.height = sizeSettings.height;
+        }
+
+        const response = await fetch('/img2img', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            currentImageData = data.image;
+            setCurrentFilename(data.filename);
+
+            generatedImage.src = data.image;
+            currentPrompt.textContent = `[img2img] ${data.prompt} (強度: ${data.strength})`;
+            filename.textContent = `檔案名稱: ${data.filename}`;
+
+            loadingSection.style.display = 'none';
+            resultSection.style.display = 'block';
+            loadHistory();
+        } else {
+            throw new Error(data.error || '圖生圖生成失敗');
+        }
+    } catch (error) {
+        console.error('img2img 錯誤:', error);
+        showError(error.message || '圖生圖生成失敗，請稍後再試');
+    } finally {
+        generateBtn.disabled = false;
+        btnText.textContent = '開始圖生圖';
+    }
 }
 
 // 單張生成處理
