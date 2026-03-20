@@ -39,3 +39,6 @@ desktop.ini
 
 # 日誌
 *.log
+
+.gemini/
+gha-creds-*.json
