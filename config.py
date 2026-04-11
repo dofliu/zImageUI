@@ -57,7 +57,7 @@ OUTPUT_PATH = r"d:\Dropbox\Project_CodingSimulation\aiAgent\zImage\generated_ima
 
 HOST = "0.0.0.0"
 PORT = 5000
-DEBUG = True
+DEBUG = False
 USE_RELOADER = False  # 避免生成過程中重新載入
 
 # ===========================

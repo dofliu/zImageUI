@@ -1,0 +1,18 @@
+name: Z-Image-Turbo Web UI
+name_zh: AI 圖片生成工作站
+category: personal_tools
+progress: 70
+status: active
+last_updated: "2026-04-11"
+next_milestone: "DEBUG=True 移除 + 生產環境設定完善 + 依賴驗證腳本整合"
+technologies:
+  - Python
+  - Flask
+  - PyTorch
+  - Diffusers
+  - Transformers
+outputs:
+  - tool
+description: "Flask-based professional AI image generation web UI using Z-Image-Turbo model, optimized for 12GB VRAM"
+description_zh: "基於 Flask 的專業 AI 圖片生成 Web 應用，使用 Z-Image-Turbo 擴散模型，針對 12GB VRAM 優化。支援批量生成（最多 20 張）、50+ 風格模板、15+ 尺寸預設、Seed 控制、標籤系統與批量 PDF/PPT 匯出。注意：config.py 中 DEBUG=True 需在上線前修正。"
+key_metrics: "v2.5.0, 50+ style templates, 5-8s/image generation"
