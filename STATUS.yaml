@@ -4,7 +4,7 @@ category: personal_tools
 progress: 70
 status: active
 last_updated: "2026-04-11"
-next_milestone: "DEBUG=True 移除 + 生產環境設定完善 + 依賴驗證腳本整合"
+next_milestone: "生產環境設定完善 + 依賴驗證腳本整合"
 technologies:
   - Python
   - Flask
