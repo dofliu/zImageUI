@@ -3,7 +3,7 @@ name_zh: AI 圖片生成工作站
 category: personal_tools
 progress: 70
 status: active
-last_updated: "2026-04-11"
+last_updated: "2026-04-16"
 next_milestone: "生產環境設定完善 + 依賴驗證腳本整合"
 technologies:
   - Python
