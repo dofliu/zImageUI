@@ -171,7 +171,7 @@ class StoryService:
             'characters': [],
             'panels': [],
             'seed_base': random.randint(0, 2**32 - 1),
-            'model_id': style_info.get('recommended_model', 'stable-diffusion-xl'),
+            'model_id': None,  # None = 使用目前已啟用的模型
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat(),
             'status': 'draft'  # draft, generating, completed
@@ -461,12 +461,16 @@ class StoryService:
 
         registry = get_model_registry()
 
-        # 如果需要切換模型
+        # 如果需要切換模型（失敗則回退使用目前已啟用的模型）
         desired_model = story.get('model_id')
         if desired_model and desired_model != registry.active_model_id:
             switch_result = registry.switch_model(desired_model)
             if not switch_result.get('success'):
-                return {'success': False, 'error': f"切換模型失敗: {switch_result.get('error')}"}
+                print(f"[!] 切換模型 {desired_model} 失敗，使用目前模型 {registry.active_model_id}")
+
+        # 確保有模型可用
+        if registry.active_pipeline is None:
+            return {'success': False, 'error': '尚未載入任何模型，請先在生成器頁面載入模型'}
 
         # 更新面板狀態
         story['panels'][panel_index]['status'] = 'generating'
