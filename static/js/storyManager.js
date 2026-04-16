@@ -249,18 +249,18 @@
         // Seed
         document.getElementById('seedBase').value = currentStory.seed_base || 42;
 
-        // 模型選單
+        // 模型選單 - 預設使用目前已啟用的模型
         const modelSelect = document.getElementById('modelSelect');
-        fetch('/models').then(r => r.json()).then(data => {
-            const currentModelId = currentStory.model_id;
-            const opts = '<option value=""' + (!currentModelId ? ' selected' : '') + '>使用目前已啟用的模型</option>' +
-                (data.models || []).map(m =>
-                    `<option value="${m.id}" ${m.id === currentModelId ? 'selected' : ''}>${m.name}${m.is_active ? ' (啟用中)' : ''}</option>`
-                ).join('');
-            modelSelect.innerHTML = opts;
+        fetch('/models/active').then(r => r.json()).then(data => {
+            const name = data.model ? data.model.name : 'Z-Image-Turbo';
+            modelSelect.innerHTML = `<option value="" selected>使用 ${name}</option>`;
         }).catch(() => {
-            modelSelect.innerHTML = '<option value="">使用目前已啟用的模型</option>';
+            modelSelect.innerHTML = '<option value="" selected>使用目前已啟用的模型</option>';
         });
+        // 如果故事有殘留的舊模型 ID，清除它
+        if (currentStory.model_id) {
+            updateStory({ model_id: null });
+        }
 
         // 佈局標籤
         const layoutName = presets.layouts?.[currentStory.layout]?.name || currentStory.layout;
@@ -515,7 +515,36 @@
 
     // ==================== 生成 ====================
 
+    async function checkModelReady() {
+        /**
+         * 檢查模型是否已就緒
+         * 返回 true 表示可以生成，false 表示不行（已顯示提示）
+         */
+        try {
+            const res = await fetch('/models/active');
+            const data = await res.json();
+
+            if (data.is_loading) {
+                alert(`模型「${data.loading_model_name}」正在載入中，請稍候再試。\n\n模型載入通常需要 30-60 秒。`);
+                return false;
+            }
+
+            if (!data.model) {
+                alert('尚未載入任何 AI 模型。\n\n請回到「生成器」頁面，系統會自動載入預設模型。\n或在模型選擇器中手動載入。');
+                return false;
+            }
+
+            return true;
+        } catch (e) {
+            alert('無法連線到伺服器，請確認服務是否正在運行。');
+            return false;
+        }
+    }
+
     async function generatePanel(index) {
+        // 檢查模型狀態
+        if (!await checkModelReady()) return;
+
         // 先儲存面板
         await savePanel(index);
 
@@ -541,6 +570,9 @@
     }
 
     async function generateAll() {
+        // 檢查模型狀態
+        if (!await checkModelReady()) return;
+
         // 先儲存所有面板
         const panels = currentStory?.panels || [];
         for (let i = 0; i < panels.length; i++) {

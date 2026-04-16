@@ -23,57 +23,49 @@ STYLE_PRESETS = {
         "name": "黑白漫畫",
         "style_prefix": "manga panel, black and white, ink drawing, screentone shading",
         "style_suffix": "manga style, clean lineart, high contrast, professional manga",
-        "negative": "color, photograph, 3d render, blurry, low quality",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "color, photograph, 3d render, blurry, low quality"
     },
     "manga_color": {
         "name": "彩色漫畫",
         "style_prefix": "colored manga panel, cel shading, vibrant colors, anime coloring",
         "style_suffix": "manga style, clean lineart, vivid colors, professional manga illustration",
-        "negative": "photograph, 3d render, blurry, low quality, realistic",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "photograph, 3d render, blurry, low quality, realistic"
     },
     "anime": {
         "name": "動漫風格",
         "style_prefix": "anime illustration, detailed anime art, studio quality",
         "style_suffix": "anime style, pixiv quality, detailed illustration, beautiful color palette",
-        "negative": "realistic, photograph, 3d, blurry, low quality, bad anatomy",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "realistic, photograph, 3d, blurry, low quality, bad anatomy"
     },
     "comic_western": {
         "name": "美式漫畫",
         "style_prefix": "western comic book panel, bold outlines, dynamic shading",
         "style_suffix": "comic book style, Marvel DC style, dramatic lighting, professional comic art",
-        "negative": "manga, anime, photograph, blurry, low quality",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "manga, anime, photograph, blurry, low quality"
     },
     "watercolor": {
         "name": "水彩繪本",
         "style_prefix": "watercolor illustration, soft colors, gentle brushstrokes, storybook art",
         "style_suffix": "watercolor style, children's book illustration, whimsical, dreamy atmosphere",
-        "negative": "photograph, 3d, harsh lighting, dark, horror",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "photograph, 3d, harsh lighting, dark, horror"
     },
     "pixel_art": {
         "name": "像素藝術",
         "style_prefix": "pixel art, 16-bit style, retro game aesthetic",
         "style_suffix": "pixel art style, clean pixels, retro gaming, sprite art quality",
-        "negative": "realistic, photograph, blurry, 3d render, smooth",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "realistic, photograph, blurry, 3d render, smooth"
     },
     "cinematic": {
         "name": "電影分鏡",
         "style_prefix": "cinematic film still, movie scene, dramatic cinematography",
         "style_suffix": "cinematic lighting, film grain, anamorphic lens, movie quality, 35mm film",
-        "negative": "cartoon, anime, illustration, drawing, blurry",
-        "recommended_model": "flux-schnell"
+        "negative": "cartoon, anime, illustration, drawing, blurry"
     },
     "ink_wash": {
         "name": "水墨風格",
         "style_prefix": "Chinese ink wash painting, traditional brush painting, sumi-e style",
         "style_suffix": "ink painting style, elegant brushwork, minimalist, traditional Asian art",
-        "negative": "colorful, modern, 3d, photograph, western art",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "colorful, modern, 3d, photograph, western art"
     }
 }
 
@@ -461,16 +453,34 @@ class StoryService:
 
         registry = get_model_registry()
 
-        # 如果需要切換模型（失敗則回退使用目前已啟用的模型）
+        # 檢查模型是否正在載入中
+        if registry.is_loading:
+            return {'success': False, 'error': f'模型「{registry.loading_model_name}」正在載入中，請稍候再試'}
+
+        # 確保有模型可用 — 若未載入則自動載入預設模型
+        if registry.active_pipeline is None:
+            models = registry.list_models()
+            if models:
+                default_id = models[0]['id']
+                print(f"[*] 自動載入預設模型: {default_id}")
+                switch_result = registry.switch_model(default_id)
+                if not switch_result.get('success'):
+                    return {'success': False, 'error': f"自動載入模型失敗: {switch_result.get('error', '未知錯誤')}"}
+            else:
+                return {'success': False, 'error': '沒有可用的模型'}
+
+        # 如果故事指定了不同模型，先檢查該模型是否存在
         desired_model = story.get('model_id')
+        if desired_model:
+            # 模型不在註冊表中（舊資料殘留），直接忽略
+            if not registry.get_model_info(desired_model):
+                print(f"[!] 故事指定的模型 {desired_model} 不存在，忽略並使用目前模型")
+                desired_model = None
+
         if desired_model and desired_model != registry.active_model_id:
             switch_result = registry.switch_model(desired_model)
             if not switch_result.get('success'):
                 print(f"[!] 切換模型 {desired_model} 失敗，使用目前模型 {registry.active_model_id}")
-
-        # 確保有模型可用
-        if registry.active_pipeline is None:
-            return {'success': False, 'error': '尚未載入任何模型，請先在生成器頁面載入模型'}
 
         # 更新面板狀態
         story['panels'][panel_index]['status'] = 'generating'

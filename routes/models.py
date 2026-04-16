@@ -25,9 +25,20 @@ def get_active_model():
     """取得目前啟用的模型"""
     registry = get_model_registry()
     active = registry.get_active_model()
-    if active:
-        return jsonify({'success': True, 'model': active})
-    return jsonify({'success': True, 'model': None, 'message': '尚未載入任何模型'})
+
+    result = {
+        'success': True,
+        'model': active,
+        'is_loading': registry.is_loading,
+        'loading_model_name': registry.loading_model_name
+    }
+
+    if registry.is_loading:
+        result['message'] = f'模型 {registry.loading_model_name} 正在載入中，請稍候...'
+    elif not active:
+        result['message'] = '尚未載入任何模型'
+
+    return jsonify(result)
 
 
 @models_bp.route('/models/switch', methods=['POST'])

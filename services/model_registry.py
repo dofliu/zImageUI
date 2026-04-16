@@ -8,7 +8,7 @@ import time
 import config
 
 
-# 預設模型清單 - 可擴展
+# 預設模型清單 - 只載入本地已安裝的模型
 DEFAULT_MODELS = [
     {
         "id": "z-image-turbo",
@@ -26,57 +26,6 @@ DEFAULT_MODELS = [
         "vram_requirement": "8-12GB",
         "tags": ["turbo", "fast", "general"],
         "status": "available"
-    },
-    {
-        "id": "stable-diffusion-xl",
-        "name": "Stable Diffusion XL",
-        "description": "高品質通用模型，適合各類風格",
-        "model_id": "stabilityai/stable-diffusion-xl-base-1.0",
-        "pipeline_class": "StableDiffusionXLPipeline",
-        "default_steps": 30,
-        "default_guidance_scale": 7.5,
-        "supports_negative_prompt": True,
-        "supports_img2img": True,
-        "min_resolution": 512,
-        "max_resolution": 2048,
-        "recommended_resolution": 1024,
-        "vram_requirement": "10-16GB",
-        "tags": ["quality", "general", "sdxl"],
-        "status": "available"
-    },
-    {
-        "id": "flux-schnell",
-        "name": "FLUX.1-schnell",
-        "description": "最新一代快速模型，畫質與速度兼具",
-        "model_id": "black-forest-labs/FLUX.1-schnell",
-        "pipeline_class": "FluxPipeline",
-        "default_steps": 4,
-        "default_guidance_scale": 0.0,
-        "supports_negative_prompt": False,
-        "supports_img2img": False,
-        "min_resolution": 512,
-        "max_resolution": 2048,
-        "recommended_resolution": 1024,
-        "vram_requirement": "12-24GB",
-        "tags": ["flux", "fast", "latest"],
-        "status": "available"
-    },
-    {
-        "id": "flux-dev",
-        "name": "FLUX.1-dev",
-        "description": "FLUX 開發版，更高品質，需要更多步數",
-        "model_id": "black-forest-labs/FLUX.1-dev",
-        "pipeline_class": "FluxPipeline",
-        "default_steps": 20,
-        "default_guidance_scale": 3.5,
-        "supports_negative_prompt": False,
-        "supports_img2img": False,
-        "min_resolution": 512,
-        "max_resolution": 2048,
-        "recommended_resolution": 1024,
-        "vram_requirement": "16-24GB",
-        "tags": ["flux", "quality", "latest"],
-        "status": "available"
     }
 ]
 
@@ -88,6 +37,8 @@ class ModelRegistry:
         self.models = {}
         self.active_model_id = None
         self.active_pipeline = None
+        self.is_loading = False  # 模型載入中狀態
+        self.loading_model_name = None
         self.custom_models_file = os.path.join(config.OUTPUT_PATH, "custom_models.json")
         self._load_default_models()
         self._load_custom_models()
@@ -102,12 +53,16 @@ class ModelRegistry:
             }
 
     def _load_custom_models(self):
-        """載入使用者自訂模型"""
+        """載入使用者自訂模型（跳過與內建模型重複的項目）"""
         if os.path.exists(self.custom_models_file):
             try:
                 with open(self.custom_models_file, 'r', encoding='utf-8') as f:
                     custom_models = json.load(f)
+                default_ids = {m["id"] for m in DEFAULT_MODELS}
                 for model_config in custom_models:
+                    # 跳過與內建模型 ID 衝突的自訂模型
+                    if model_config["id"] in default_ids:
+                        continue
                     model_config["is_custom"] = True
                     model_config["is_cached"] = self._check_model_cached(model_config["model_id"])
                     self.models[model_config["id"]] = model_config
@@ -159,18 +114,29 @@ class ModelRegistry:
                 "model": model_info
             }
 
-        # 卸載目前模型
-        if self.active_pipeline is not None:
-            self._unload_current_model()
+        # 如果正在載入中，拒絕切換
+        if self.is_loading:
+            return {"success": False, "error": f"模型 {self.loading_model_name} 正在載入中，請稍候"}
 
-        # 載入新模型
+        # 載入新模型（先載入，成功後才卸載舊模型）
+        self.is_loading = True
+        self.loading_model_name = model_info['name']
         try:
             start_time = time.time()
             pipeline = self._load_model(model_info)
             elapsed = time.time() - start_time
 
+            # 新模型載入成功，安全卸載舊模型
+            old_pipeline = self.active_pipeline
             self.active_pipeline = pipeline
             self.active_model_id = model_id
+
+            if old_pipeline is not None:
+                import torch
+                del old_pipeline
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                print(f"[OK] 已卸載舊模型")
 
             return {
                 "success": True,
@@ -179,7 +145,12 @@ class ModelRegistry:
                 "load_time": elapsed
             }
         except Exception as e:
+            # 載入失敗，舊模型保持不動
+            print(f"[!] 載入模型 {model_info['name']} 失敗: {e}")
             return {"success": False, "error": f"載入模型失敗: {str(e)}"}
+        finally:
+            self.is_loading = False
+            self.loading_model_name = None
 
     def _load_model(self, model_info):
         """載入指定模型"""
@@ -223,19 +194,11 @@ class ModelRegistry:
 
     def _get_pipeline_class(self, class_name):
         """動態取得 pipeline 類別"""
-        from diffusers import (
-            ZImagePipeline,
-            StableDiffusionXLPipeline,
-            FluxPipeline,
-        )
-        pipeline_map = {
-            "ZImagePipeline": ZImagePipeline,
-            "StableDiffusionXLPipeline": StableDiffusionXLPipeline,
-            "FluxPipeline": FluxPipeline,
-        }
-        if class_name in pipeline_map:
-            return pipeline_map[class_name]
-        raise ValueError(f"不支援的 pipeline 類別: {class_name}")
+        import diffusers
+        pipeline_cls = getattr(diffusers, class_name, None)
+        if pipeline_cls is None:
+            raise ValueError(f"不支援的 pipeline 類別: {class_name}")
+        return pipeline_cls
 
     def _apply_optimizations(self, pipe):
         """套用 VRAM 優化設定"""
