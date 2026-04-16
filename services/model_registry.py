@@ -88,6 +88,8 @@ class ModelRegistry:
         self.models = {}
         self.active_model_id = None
         self.active_pipeline = None
+        self.is_loading = False  # 模型載入中狀態
+        self.loading_model_name = None
         self.custom_models_file = os.path.join(config.OUTPUT_PATH, "custom_models.json")
         self._load_default_models()
         self._load_custom_models()
@@ -159,18 +161,29 @@ class ModelRegistry:
                 "model": model_info
             }
 
-        # 卸載目前模型
-        if self.active_pipeline is not None:
-            self._unload_current_model()
+        # 如果正在載入中，拒絕切換
+        if self.is_loading:
+            return {"success": False, "error": f"模型 {self.loading_model_name} 正在載入中，請稍候"}
 
-        # 載入新模型
+        # 載入新模型（先載入，成功後才卸載舊模型）
+        self.is_loading = True
+        self.loading_model_name = model_info['name']
         try:
             start_time = time.time()
             pipeline = self._load_model(model_info)
             elapsed = time.time() - start_time
 
+            # 新模型載入成功，安全卸載舊模型
+            old_pipeline = self.active_pipeline
             self.active_pipeline = pipeline
             self.active_model_id = model_id
+
+            if old_pipeline is not None:
+                import torch
+                del old_pipeline
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                print(f"[OK] 已卸載舊模型")
 
             return {
                 "success": True,
@@ -179,7 +192,12 @@ class ModelRegistry:
                 "load_time": elapsed
             }
         except Exception as e:
+            # 載入失敗，舊模型保持不動
+            print(f"[!] 載入模型 {model_info['name']} 失敗: {e}")
             return {"success": False, "error": f"載入模型失敗: {str(e)}"}
+        finally:
+            self.is_loading = False
+            self.loading_model_name = None
 
     def _load_model(self, model_info):
         """載入指定模型"""

@@ -515,7 +515,36 @@
 
     // ==================== 生成 ====================
 
+    async function checkModelReady() {
+        /**
+         * 檢查模型是否已就緒
+         * 返回 true 表示可以生成，false 表示不行（已顯示提示）
+         */
+        try {
+            const res = await fetch('/models/active');
+            const data = await res.json();
+
+            if (data.is_loading) {
+                alert(`模型「${data.loading_model_name}」正在載入中，請稍候再試。\n\n模型載入通常需要 30-60 秒。`);
+                return false;
+            }
+
+            if (!data.model) {
+                alert('尚未載入任何 AI 模型。\n\n請回到「生成器」頁面，系統會自動載入預設模型。\n或在模型選擇器中手動載入。');
+                return false;
+            }
+
+            return true;
+        } catch (e) {
+            alert('無法連線到伺服器，請確認服務是否正在運行。');
+            return false;
+        }
+    }
+
     async function generatePanel(index) {
+        // 檢查模型狀態
+        if (!await checkModelReady()) return;
+
         // 先儲存面板
         await savePanel(index);
 
@@ -541,6 +570,9 @@
     }
 
     async function generateAll() {
+        // 檢查模型狀態
+        if (!await checkModelReady()) return;
+
         // 先儲存所有面板
         const panels = currentStory?.panels || [];
         for (let i = 0; i < panels.length; i++) {
