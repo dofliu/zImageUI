@@ -24,6 +24,7 @@
         document.getElementById('addCharacterBtn')?.addEventListener('click', () => openCharDialog());
         document.getElementById('confirmCharBtn')?.addEventListener('click', confirmCharacter);
         document.getElementById('addPanelBtn')?.addEventListener('click', addPanel);
+        document.getElementById('aiScriptBtn')?.addEventListener('click', generateScript);
         document.getElementById('generateAllBtn')?.addEventListener('click', generateAll);
         document.getElementById('previewPromptsBtn')?.addEventListener('click', previewPrompts);
         document.getElementById('saveStyleBtn')?.addEventListener('click', saveStyle);
@@ -538,6 +539,47 @@
         } catch (e) {
             alert('無法連線到伺服器，請確認服務是否正在運行。');
             return false;
+        }
+    }
+
+    async function generateScript() {
+        if (!currentStory) return;
+
+        // 確認操作
+        const hasContent = currentStory.panels.some(p => p.scene_description);
+        if (hasContent) {
+            if (!confirm('AI 將會覆寫目前的面板描述，確定要繼續嗎？')) return;
+        }
+
+        const btn = document.getElementById('aiScriptBtn');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'AI 思考中...';
+
+        try {
+            // 先檢查 LLM 狀態
+            const statusRes = await fetch('/llm/status');
+            const statusData = await statusRes.json();
+            if (!statusData.model_loaded) {
+                alert('尚未載入 AI 語言模型。\n\n請先到設定頁面載入 LLM 模型，才能使用 AI 生成腳本功能。');
+                return;
+            }
+
+            const res = await fetch(`/api/stories/${currentStory.id}/generate-script`, { method: 'POST' });
+            const data = await res.json();
+
+            if (data.success) {
+                // 重新載入故事資料並刷新面板
+                await openStory(currentStory.id);
+                alert(`腳本生成完成！已自動填入 ${data.panels.length} 個面板的場景描述。\n\n你可以檢查並修改後再生成圖片。`);
+            } else {
+                alert('腳本生成失敗: ' + (data.error || '未知錯誤'));
+            }
+        } catch (e) {
+            alert('腳本生成失敗: ' + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
         }
     }
 

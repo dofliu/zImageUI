@@ -161,6 +161,18 @@ def preview_prompts(story_id):
     return jsonify({'success': True, 'prompts': prompts})
 
 
+# ========== AI 腳本生成 ==========
+
+@story_bp.route('/api/stories/<story_id>/generate-script', methods=['POST'])
+def generate_script(story_id):
+    """用 AI 自動生成故事腳本"""
+    service = get_story_service()
+    result = service.generate_script(story_id)
+    if result.get('success'):
+        return jsonify(result)
+    return jsonify(result), 400
+
+
 # ========== 生成 ==========
 
 @story_bp.route('/api/stories/<story_id>/generate/<int:panel_index>', methods=['POST'])

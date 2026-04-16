@@ -574,6 +574,172 @@ class StoryService:
             return None
         return os.path.join(config.OUTPUT_PATH, 'stories', story_id, filename)
 
+    # ========== AI 腳本生成 ==========
+
+    def generate_script(self, story_id):
+        """用 LLM 自動生成故事腳本（面板描述）"""
+        from services.llm_service import get_llm_service
+
+        story = self.get_story(story_id)
+        if not story:
+            return {'success': False, 'error': '找不到故事'}
+
+        llm = get_llm_service()
+        if llm.model is None:
+            return {'success': False, 'error': '尚未載入 LLM 模型，請先在設定中載入語言模型'}
+
+        layout_key = story.get('layout', '4koma')
+        layout = LAYOUT_PRESETS.get(layout_key, LAYOUT_PRESETS['4koma'])
+        panel_count = layout['panels']
+        structure = layout.get('structure', [])
+
+        style_key = story.get('style_preset', 'anime')
+        style = STYLE_PRESETS.get(style_key, STYLE_PRESETS['anime'])
+
+        # 組裝角色資訊
+        char_info = ""
+        if story.get('characters'):
+            char_lines = []
+            for c in story['characters']:
+                char_lines.append(f"- {c['name']}: {c.get('appearance', '')}")
+            char_info = "\n".join(char_lines)
+
+        # 組裝結構提示
+        structure_hints = ""
+        if structure:
+            hints = [f"Panel {i+1}: {s}" for i, s in enumerate(structure)]
+            structure_hints = "\n".join(hints)
+
+        camera_angles = ", ".join(self.get_camera_angles()[:8])
+        mood_options = ", ".join(self.get_mood_options()[:8])
+
+        system_prompt = """You are a professional comic/manga script writer.
+Your job is to generate panel-by-panel scene descriptions for image generation AI.
+ALL scene descriptions MUST be written in English.
+Output ONLY valid JSON, no explanations or markdown."""
+
+        user_prompt = f"""Create a {panel_count}-panel comic script.
+
+Title: {story.get('title', '')}
+Story concept: {story.get('description', '(no description provided)')}
+Visual style: {style['name']}
+
+Characters:
+{char_info if char_info else '(no characters defined yet)'}
+
+Story structure:
+{structure_hints if structure_hints else f'{panel_count} panels'}
+
+Available camera angles: {camera_angles}
+Available moods: {mood_options}
+
+Output this exact JSON format:
+{{
+  "panels": [
+    {{
+      "scene_description": "English description of what happens in this panel, focusing on actions, poses, expressions, and environment",
+      "camera_angle": "one of the available camera angles",
+      "mood": "one of the available moods",
+      "characters": ["character names that appear in this panel"]
+    }}
+  ]
+}}
+
+Rules:
+- scene_description must be in English, detailed enough for image AI (30-60 words each)
+- Each panel should advance the story
+- Vary camera angles across panels for visual interest
+- Match mood to the story moment
+- Reference character names so we know who appears in each panel"""
+
+        try:
+            response = llm.chat(user_prompt, system_prompt)
+
+            # 嘗試解析 JSON
+            panels_data = self._parse_script_response(response)
+            if not panels_data:
+                return {
+                    'success': False,
+                    'error': 'AI 回覆格式無法解析，請重試',
+                    'raw_response': response
+                }
+
+            # 將 AI 生成的腳本填入面板
+            char_name_to_id = {}
+            for c in story.get('characters', []):
+                char_name_to_id[c['name'].lower()] = c['id']
+
+            # 確保面板數量匹配
+            while len(story['panels']) < len(panels_data):
+                story['panels'].append({
+                    'index': len(story['panels']),
+                    'scene_description': '',
+                    'structure_hint': '',
+                    'character_ids': [],
+                    'camera_angle': 'medium shot',
+                    'mood': '',
+                    'generated_image': None,
+                    'seed_offset': len(story['panels']),
+                    'status': 'empty',
+                    'generated_prompt': None,
+                    'actual_seed': None
+                })
+
+            for i, panel_data in enumerate(panels_data):
+                if i >= len(story['panels']):
+                    break
+                panel = story['panels'][i]
+                panel['scene_description'] = panel_data.get('scene_description', '')
+                panel['camera_angle'] = panel_data.get('camera_angle', 'medium shot')
+                panel['mood'] = panel_data.get('mood', '')
+                panel['status'] = 'ready'
+
+                # 根據角色名稱匹配 ID
+                char_names = panel_data.get('characters', [])
+                matched_ids = []
+                for name in char_names:
+                    name_lower = name.lower()
+                    for cname, cid in char_name_to_id.items():
+                        if cname in name_lower or name_lower in cname:
+                            matched_ids.append(cid)
+                            break
+                panel['character_ids'] = matched_ids
+
+            story['updated_at'] = datetime.now().isoformat()
+            self._save()
+
+            return {
+                'success': True,
+                'message': f'已自動生成 {len(panels_data)} 個面板的腳本',
+                'panels': story['panels']
+            }
+        except Exception as e:
+            return {'success': False, 'error': f'腳本生成失敗: {str(e)}'}
+
+    def _parse_script_response(self, response):
+        """解析 LLM 回傳的 JSON 腳本"""
+        import re
+        # 嘗試直接解析
+        try:
+            data = json.loads(response)
+            if 'panels' in data:
+                return data['panels']
+            return None
+        except json.JSONDecodeError:
+            pass
+
+        # 嘗試提取 JSON 區塊
+        json_match = re.search(r'\{[\s\S]*"panels"[\s\S]*\}', response)
+        if json_match:
+            try:
+                data = json.loads(json_match.group())
+                if 'panels' in data:
+                    return data['panels']
+            except json.JSONDecodeError:
+                pass
+
+        return None
+
     # ========== 靜態資料 ==========
 
     @staticmethod
