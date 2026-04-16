@@ -23,57 +23,49 @@ STYLE_PRESETS = {
         "name": "黑白漫畫",
         "style_prefix": "manga panel, black and white, ink drawing, screentone shading",
         "style_suffix": "manga style, clean lineart, high contrast, professional manga",
-        "negative": "color, photograph, 3d render, blurry, low quality",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "color, photograph, 3d render, blurry, low quality"
     },
     "manga_color": {
         "name": "彩色漫畫",
         "style_prefix": "colored manga panel, cel shading, vibrant colors, anime coloring",
         "style_suffix": "manga style, clean lineart, vivid colors, professional manga illustration",
-        "negative": "photograph, 3d render, blurry, low quality, realistic",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "photograph, 3d render, blurry, low quality, realistic"
     },
     "anime": {
         "name": "動漫風格",
         "style_prefix": "anime illustration, detailed anime art, studio quality",
         "style_suffix": "anime style, pixiv quality, detailed illustration, beautiful color palette",
-        "negative": "realistic, photograph, 3d, blurry, low quality, bad anatomy",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "realistic, photograph, 3d, blurry, low quality, bad anatomy"
     },
     "comic_western": {
         "name": "美式漫畫",
         "style_prefix": "western comic book panel, bold outlines, dynamic shading",
         "style_suffix": "comic book style, Marvel DC style, dramatic lighting, professional comic art",
-        "negative": "manga, anime, photograph, blurry, low quality",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "manga, anime, photograph, blurry, low quality"
     },
     "watercolor": {
         "name": "水彩繪本",
         "style_prefix": "watercolor illustration, soft colors, gentle brushstrokes, storybook art",
         "style_suffix": "watercolor style, children's book illustration, whimsical, dreamy atmosphere",
-        "negative": "photograph, 3d, harsh lighting, dark, horror",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "photograph, 3d, harsh lighting, dark, horror"
     },
     "pixel_art": {
         "name": "像素藝術",
         "style_prefix": "pixel art, 16-bit style, retro game aesthetic",
         "style_suffix": "pixel art style, clean pixels, retro gaming, sprite art quality",
-        "negative": "realistic, photograph, blurry, 3d render, smooth",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "realistic, photograph, blurry, 3d render, smooth"
     },
     "cinematic": {
         "name": "電影分鏡",
         "style_prefix": "cinematic film still, movie scene, dramatic cinematography",
         "style_suffix": "cinematic lighting, film grain, anamorphic lens, movie quality, 35mm film",
-        "negative": "cartoon, anime, illustration, drawing, blurry",
-        "recommended_model": "flux-schnell"
+        "negative": "cartoon, anime, illustration, drawing, blurry"
     },
     "ink_wash": {
         "name": "水墨風格",
         "style_prefix": "Chinese ink wash painting, traditional brush painting, sumi-e style",
         "style_suffix": "ink painting style, elegant brushwork, minimalist, traditional Asian art",
-        "negative": "colorful, modern, 3d, photograph, western art",
-        "recommended_model": "stable-diffusion-xl"
+        "negative": "colorful, modern, 3d, photograph, western art"
     }
 }
 

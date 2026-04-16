@@ -8,7 +8,7 @@ import time
 import config
 
 
-# 預設模型清單 - 可擴展
+# 預設模型清單 - 只載入本地已安裝的模型
 DEFAULT_MODELS = [
     {
         "id": "z-image-turbo",
@@ -25,57 +25,6 @@ DEFAULT_MODELS = [
         "recommended_resolution": 768,
         "vram_requirement": "8-12GB",
         "tags": ["turbo", "fast", "general"],
-        "status": "available"
-    },
-    {
-        "id": "stable-diffusion-xl",
-        "name": "Stable Diffusion XL",
-        "description": "高品質通用模型，適合各類風格",
-        "model_id": "stabilityai/stable-diffusion-xl-base-1.0",
-        "pipeline_class": "StableDiffusionXLPipeline",
-        "default_steps": 30,
-        "default_guidance_scale": 7.5,
-        "supports_negative_prompt": True,
-        "supports_img2img": True,
-        "min_resolution": 512,
-        "max_resolution": 2048,
-        "recommended_resolution": 1024,
-        "vram_requirement": "10-16GB",
-        "tags": ["quality", "general", "sdxl"],
-        "status": "available"
-    },
-    {
-        "id": "flux-schnell",
-        "name": "FLUX.1-schnell",
-        "description": "最新一代快速模型，畫質與速度兼具",
-        "model_id": "black-forest-labs/FLUX.1-schnell",
-        "pipeline_class": "FluxPipeline",
-        "default_steps": 4,
-        "default_guidance_scale": 0.0,
-        "supports_negative_prompt": False,
-        "supports_img2img": False,
-        "min_resolution": 512,
-        "max_resolution": 2048,
-        "recommended_resolution": 1024,
-        "vram_requirement": "12-24GB",
-        "tags": ["flux", "fast", "latest"],
-        "status": "available"
-    },
-    {
-        "id": "flux-dev",
-        "name": "FLUX.1-dev",
-        "description": "FLUX 開發版，更高品質，需要更多步數",
-        "model_id": "black-forest-labs/FLUX.1-dev",
-        "pipeline_class": "FluxPipeline",
-        "default_steps": 20,
-        "default_guidance_scale": 3.5,
-        "supports_negative_prompt": False,
-        "supports_img2img": False,
-        "min_resolution": 512,
-        "max_resolution": 2048,
-        "recommended_resolution": 1024,
-        "vram_requirement": "16-24GB",
-        "tags": ["flux", "quality", "latest"],
         "status": "available"
     }
 ]
