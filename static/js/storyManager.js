@@ -252,11 +252,14 @@
         // 模型選單
         const modelSelect = document.getElementById('modelSelect');
         fetch('/models').then(r => r.json()).then(data => {
-            modelSelect.innerHTML = (data.models || []).map(m =>
-                `<option value="${m.id}" ${m.id === currentStory.model_id ? 'selected' : ''}>${m.name}</option>`
-            ).join('');
+            const currentModelId = currentStory.model_id;
+            const opts = '<option value=""' + (!currentModelId ? ' selected' : '') + '>使用目前已啟用的模型</option>' +
+                (data.models || []).map(m =>
+                    `<option value="${m.id}" ${m.id === currentModelId ? 'selected' : ''}>${m.name}${m.is_active ? ' (啟用中)' : ''}</option>`
+                ).join('');
+            modelSelect.innerHTML = opts;
         }).catch(() => {
-            modelSelect.innerHTML = '<option value="">載入失敗</option>';
+            modelSelect.innerHTML = '<option value="">使用目前已啟用的模型</option>';
         });
 
         // 佈局標籤
@@ -279,7 +282,7 @@
     async function saveSeedSettings() {
         if (!currentStory) return;
         const seed_base = parseInt(document.getElementById('seedBase').value) || 42;
-        const model_id = document.getElementById('modelSelect').value;
+        const model_id = document.getElementById('modelSelect').value || null;
         await updateStory({ seed_base, model_id });
         showToast('一致性設定已儲存');
     }
