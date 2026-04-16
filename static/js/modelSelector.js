@@ -1,12 +1,13 @@
 /**
- * Model Selector - 模型選擇器 UI
- * 提供多模型切換、狀態顯示和模型資訊面板
+ * Model Selector - 模型狀態顯示
+ * 精簡版：顯示目前模型狀態，支援一鍵載入
  */
 (function () {
     'use strict';
 
     let currentModelId = null;
     let availableModels = [];
+    let pollTimer = null;
 
     // ===== 初始化 =====
     document.addEventListener('DOMContentLoaded', () => {
@@ -21,109 +22,105 @@
             if (data.success) {
                 availableModels = data.models;
                 currentModelId = data.active_model;
-                renderModelSelector();
+                renderModelStatus();
             }
         } catch (error) {
             console.error('載入模型列表失敗:', error);
+            renderError();
         }
     }
 
-    function renderModelSelector() {
+    function renderModelStatus() {
         const container = document.getElementById('modelSelectorContainer');
         if (!container) return;
 
         const activeModel = availableModels.find(m => m.id === currentModelId);
+        const defaultModel = availableModels[0]; // 唯一的模型
 
-        container.innerHTML = `
-            <div class="model-selector-header">
-                <span class="model-selector-label">AI 模型</span>
-                <span class="model-selector-active">${activeModel ? activeModel.name : '未載入'}</span>
-            </div>
-            <div class="model-selector-grid">
-                ${availableModels.map(model => `
-                    <div class="model-card ${model.id === currentModelId ? 'active' : ''} ${model.is_cached ? '' : 'not-cached'}"
-                         data-model-id="${model.id}">
-                        <div class="model-card-header">
-                            <span class="model-name">${model.name}</span>
-                            ${model.is_cached ? '<span class="cached-badge">已快取</span>' : '<span class="download-badge">需下載</span>'}
-                        </div>
-                        <p class="model-desc">${model.description}</p>
-                        <div class="model-meta">
-                            <span class="model-vram">${model.vram_requirement}</span>
-                            <span class="model-steps">${model.default_steps} 步</span>
-                        </div>
-                        <div class="model-tags">
-                            ${(model.tags || []).map(t => `<span class="model-tag">${t}</span>`).join('')}
-                        </div>
+        if (activeModel) {
+            // 模型已載入 - 顯示就緒狀態
+            container.innerHTML = `
+                <div class="model-status ready">
+                    <div class="model-status-icon">✓</div>
+                    <div class="model-status-info">
+                        <span class="model-status-name">${activeModel.name}</span>
+                        <span class="model-status-detail">模型就緒 · ${activeModel.default_steps} 步 · ${activeModel.vram_requirement}</span>
                     </div>
-                `).join('')}
-            </div>
-        `;
-
-        // 綁定點擊事件
-        container.querySelectorAll('.model-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const modelId = card.dataset.modelId;
-                switchModel(modelId);
+                </div>
+            `;
+        } else if (defaultModel) {
+            // 模型未載入 - 顯示載入按鈕
+            container.innerHTML = `
+                <div class="model-status idle" id="modelLoadArea">
+                    <div class="model-status-icon">○</div>
+                    <div class="model-status-info">
+                        <span class="model-status-name">${defaultModel.name}</span>
+                        <span class="model-status-detail">尚未載入</span>
+                    </div>
+                    <button class="model-load-btn" id="loadModelBtn">載入模型</button>
+                </div>
+            `;
+            document.getElementById('loadModelBtn').addEventListener('click', () => {
+                loadDefaultModel(defaultModel);
             });
-        });
+        } else {
+            renderError();
+        }
     }
 
-    async function switchModel(modelId) {
-        if (modelId === currentModelId) return;
-
-        const model = availableModels.find(m => m.id === modelId);
-        if (!model) return;
-
-        // 確認切換
-        if (!model.is_cached) {
-            if (!confirm(`模型 "${model.name}" 尚未快取，需要從 Hugging Face 下載。是否繼續？`)) {
-                return;
-            }
-        }
-
-        // 顯示載入狀態
+    function renderLoading(modelName) {
         const container = document.getElementById('modelSelectorContainer');
-        const card = container.querySelector(`[data-model-id="${modelId}"]`);
-        if (card) {
-            card.classList.add('loading');
-            card.querySelector('.model-name').textContent = `${model.name} (載入中...)`;
-        }
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="model-status loading">
+                <div class="model-status-spinner"></div>
+                <div class="model-status-info">
+                    <span class="model-status-name">${modelName}</span>
+                    <span class="model-status-detail">模型載入中，請稍候...</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderError() {
+        const container = document.getElementById('modelSelectorContainer');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="model-status error">
+                <div class="model-status-icon">!</div>
+                <div class="model-status-info">
+                    <span class="model-status-name">模型載入失敗</span>
+                    <span class="model-status-detail">請檢查模型檔案或重新整理頁面</span>
+                </div>
+                <button class="model-load-btn" onclick="location.reload()">重試</button>
+            </div>
+        `;
+    }
+
+    async function loadDefaultModel(model) {
+        renderLoading(model.name);
 
         try {
             const response = await fetch('/models/switch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model_id: modelId })
+                body: JSON.stringify({ model_id: model.id })
             });
 
             const data = await response.json();
 
             if (data.success) {
-                currentModelId = modelId;
-                renderModelSelector();
-                // 更新生成按鈕狀態
-                updateGenerateButton(model);
+                currentModelId = model.id;
+                renderModelStatus();
             } else {
-                alert('切換模型失敗: ' + (data.error || '未知錯誤'));
-                renderModelSelector();
+                renderError();
+                console.error('載入模型失敗:', data.error);
             }
         } catch (error) {
-            alert('切換模型失敗: ' + error.message);
-            renderModelSelector();
-        }
-    }
-
-    function updateGenerateButton(model) {
-        const btnText = document.getElementById('btnText');
-        if (btnText && btnText.textContent.includes('生成')) {
-            // 保持原本的文字
-        }
-
-        // 更新 img2img 按鈕可見性
-        const img2imgSection = document.getElementById('img2imgSection');
-        if (img2imgSection) {
-            img2imgSection.style.display = model.supports_img2img ? 'block' : 'none';
+            renderError();
+            console.error('載入模型失敗:', error);
         }
     }
 
@@ -131,7 +128,8 @@
     window.ModelSelector = {
         getCurrentModel: () => currentModelId,
         getModels: () => availableModels,
-        refresh: loadModels
+        refresh: loadModels,
+        isReady: () => currentModelId !== null
     };
 
 })();

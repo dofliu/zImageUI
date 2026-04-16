@@ -53,12 +53,16 @@ class ModelRegistry:
             }
 
     def _load_custom_models(self):
-        """載入使用者自訂模型"""
+        """載入使用者自訂模型（跳過與內建模型重複的項目）"""
         if os.path.exists(self.custom_models_file):
             try:
                 with open(self.custom_models_file, 'r', encoding='utf-8') as f:
                     custom_models = json.load(f)
+                default_ids = {m["id"] for m in DEFAULT_MODELS}
                 for model_config in custom_models:
+                    # 跳過與內建模型 ID 衝突的自訂模型
+                    if model_config["id"] in default_ids:
+                        continue
                     model_config["is_custom"] = True
                     model_config["is_cached"] = self._check_model_cached(model_config["model_id"])
                     self.models[model_config["id"]] = model_config
@@ -190,19 +194,11 @@ class ModelRegistry:
 
     def _get_pipeline_class(self, class_name):
         """動態取得 pipeline 類別"""
-        from diffusers import (
-            ZImagePipeline,
-            StableDiffusionXLPipeline,
-            FluxPipeline,
-        )
-        pipeline_map = {
-            "ZImagePipeline": ZImagePipeline,
-            "StableDiffusionXLPipeline": StableDiffusionXLPipeline,
-            "FluxPipeline": FluxPipeline,
-        }
-        if class_name in pipeline_map:
-            return pipeline_map[class_name]
-        raise ValueError(f"不支援的 pipeline 類別: {class_name}")
+        import diffusers
+        pipeline_cls = getattr(diffusers, class_name, None)
+        if pipeline_cls is None:
+            raise ValueError(f"不支援的 pipeline 類別: {class_name}")
+        return pipeline_cls
 
     def _apply_optimizations(self, pipe):
         """套用 VRAM 優化設定"""
