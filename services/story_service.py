@@ -469,8 +469,14 @@ class StoryService:
             else:
                 return {'success': False, 'error': '沒有可用的模型'}
 
-        # 如果故事指定了不同模型，嘗試切換（失敗則繼續使用目前模型）
+        # 如果故事指定了不同模型，先檢查該模型是否存在
         desired_model = story.get('model_id')
+        if desired_model:
+            # 模型不在註冊表中（舊資料殘留），直接忽略
+            if not registry.get_model_info(desired_model):
+                print(f"[!] 故事指定的模型 {desired_model} 不存在，忽略並使用目前模型")
+                desired_model = None
+
         if desired_model and desired_model != registry.active_model_id:
             switch_result = registry.switch_model(desired_model)
             if not switch_result.get('success'):

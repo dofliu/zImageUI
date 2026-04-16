@@ -249,18 +249,18 @@
         // Seed
         document.getElementById('seedBase').value = currentStory.seed_base || 42;
 
-        // 模型選單
+        // 模型選單 - 預設使用目前已啟用的模型
         const modelSelect = document.getElementById('modelSelect');
-        fetch('/models').then(r => r.json()).then(data => {
-            const currentModelId = currentStory.model_id;
-            const opts = '<option value=""' + (!currentModelId ? ' selected' : '') + '>使用目前已啟用的模型</option>' +
-                (data.models || []).map(m =>
-                    `<option value="${m.id}" ${m.id === currentModelId ? 'selected' : ''}>${m.name}${m.is_active ? ' (啟用中)' : ''}</option>`
-                ).join('');
-            modelSelect.innerHTML = opts;
+        fetch('/models/active').then(r => r.json()).then(data => {
+            const name = data.model ? data.model.name : 'Z-Image-Turbo';
+            modelSelect.innerHTML = `<option value="" selected>使用 ${name}</option>`;
         }).catch(() => {
-            modelSelect.innerHTML = '<option value="">使用目前已啟用的模型</option>';
+            modelSelect.innerHTML = '<option value="" selected>使用目前已啟用的模型</option>';
         });
+        // 如果故事有殘留的舊模型 ID，清除它
+        if (currentStory.model_id) {
+            updateStory({ model_id: null });
+        }
 
         // 佈局標籤
         const layoutName = presets.layouts?.[currentStory.layout]?.name || currentStory.layout;
