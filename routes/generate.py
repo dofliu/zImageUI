@@ -43,7 +43,14 @@ def generate_image():
         # 使用模型註冊表生成圖片
         registry = get_model_registry()
         if registry.active_pipeline is None:
-            return jsonify({'error': '尚未載入模型，請先在模型選擇器中選擇一個模型'}), 503
+            # 自動載入預設模型
+            models = registry.list_models()
+            if models:
+                switch_result = registry.switch_model(models[0]['id'])
+                if not switch_result.get('success'):
+                    return jsonify({'error': f"自動載入模型失敗: {switch_result.get('error', '')}"}), 503
+            else:
+                return jsonify({'error': '沒有可用的模型'}), 503
 
         if style_keywords:
             print(f"風格: {style_keywords}")

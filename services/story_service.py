@@ -457,11 +457,19 @@ class StoryService:
         if registry.is_loading:
             return {'success': False, 'error': f'模型「{registry.loading_model_name}」正在載入中，請稍候再試'}
 
-        # 確保有模型可用
+        # 確保有模型可用 — 若未載入則自動載入預設模型
         if registry.active_pipeline is None:
-            return {'success': False, 'error': '尚未載入任何模型，請先在生成器頁面載入模型'}
+            models = registry.list_models()
+            if models:
+                default_id = models[0]['id']
+                print(f"[*] 自動載入預設模型: {default_id}")
+                switch_result = registry.switch_model(default_id)
+                if not switch_result.get('success'):
+                    return {'success': False, 'error': f"自動載入模型失敗: {switch_result.get('error', '未知錯誤')}"}
+            else:
+                return {'success': False, 'error': '沒有可用的模型'}
 
-        # 如果需要切換模型（失敗則回退使用目前已啟用的模型）
+        # 如果故事指定了不同模型，嘗試切換（失敗則繼續使用目前模型）
         desired_model = story.get('model_id')
         if desired_model and desired_model != registry.active_model_id:
             switch_result = registry.switch_model(desired_model)
