@@ -576,8 +576,13 @@ class StoryService:
 
     # ========== AI 腳本生成 ==========
 
-    def generate_script(self, story_id):
-        """用 LLM 自動生成故事腳本（面板描述）"""
+    def generate_script(self, story_id, auto_create_characters=True):
+        """用 LLM 自動生成故事腳本（角色 + 面板描述）
+
+        Args:
+            story_id: 故事 ID
+            auto_create_characters: 若故事尚無角色，是否自動生成
+        """
         from services.llm_service import get_llm_service
 
         story = self.get_story(story_id)
@@ -595,6 +600,26 @@ class StoryService:
 
         style_key = story.get('style_preset', 'anime')
         style = STYLE_PRESETS.get(style_key, STYLE_PRESETS['anime'])
+
+        # 若尚無角色且允許自動生成，先讓 AI 構想角色
+        characters_created = []
+        if auto_create_characters and not story.get('characters'):
+            char_result = self._generate_characters_via_llm(llm, story, style)
+            if char_result.get('success'):
+                for c in char_result['characters']:
+                    created = self.add_character(
+                        story_id=story_id,
+                        name=c['name'],
+                        appearance=c['appearance'],
+                        traits=c.get('traits', []),
+                        color_palette=c.get('color_palette', '')
+                    )
+                    if created:
+                        characters_created.append(created)
+                # 重新載入故事以取得最新角色
+                story = self.get_story(story_id)
+            else:
+                print(f"[!] 角色生成失敗: {char_result.get('error')}，將繼續生成腳本")
 
         # 組裝角色資訊
         char_info = ""
@@ -710,11 +735,79 @@ Rules:
 
             return {
                 'success': True,
-                'message': f'已自動生成 {len(panels_data)} 個面板的腳本',
-                'panels': story['panels']
+                'message': f'已自動生成 {len(characters_created)} 個角色和 {len(panels_data)} 個面板',
+                'panels': story['panels'],
+                'characters_created': len(characters_created)
             }
         except Exception as e:
             return {'success': False, 'error': f'腳本生成失敗: {str(e)}'}
+
+    def _generate_characters_via_llm(self, llm, story, style):
+        """讓 LLM 根據故事概念自動構想角色"""
+        system_prompt = """You are a professional character designer for comics and manga.
+Your job is to design memorable characters with distinct visual appearances.
+ALL appearance descriptions MUST be written in English, detailed enough for image generation AI.
+Output ONLY valid JSON, no explanations or markdown."""
+
+        user_prompt = f"""Design 1 to 3 main characters for this story.
+
+Title: {story.get('title', '')}
+Story concept: {story.get('description', '(no description provided)')}
+Visual style: {style['name']}
+
+For each character, provide:
+- A short memorable name (can be Chinese or English)
+- A detailed English appearance description (hair, eyes, clothing, distinctive features, 25-50 words)
+  This will be embedded verbatim into every image prompt, so be specific and visual.
+- 2-4 personality traits (short English words)
+- A signature color (e.g., "crimson red", "ocean blue")
+
+Output this exact JSON format:
+{{
+  "characters": [
+    {{
+      "name": "character name",
+      "appearance": "detailed English visual description",
+      "traits": ["trait1", "trait2", "trait3"],
+      "color_palette": "signature color"
+    }}
+  ]
+}}
+
+Rules:
+- Design 1-3 characters (not more) that fit the story
+- Each appearance must be distinctive enough that the character can be recognized across panels
+- Include specific details: hair color/length, eye color, clothing style, age range, distinctive features
+- Avoid generic descriptions - be specific and visual"""
+
+        try:
+            response = llm.chat(user_prompt, system_prompt)
+            characters = self._parse_characters_response(response)
+            if not characters:
+                return {'success': False, 'error': '無法解析角色資料', 'raw_response': response}
+            return {'success': True, 'characters': characters}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def _parse_characters_response(self, response):
+        """解析 LLM 回傳的角色 JSON"""
+        import re
+        try:
+            data = json.loads(response)
+            if 'characters' in data:
+                return data['characters']
+        except json.JSONDecodeError:
+            pass
+
+        json_match = re.search(r'\{[\s\S]*"characters"[\s\S]*\}', response)
+        if json_match:
+            try:
+                data = json.loads(json_match.group())
+                if 'characters' in data:
+                    return data['characters']
+            except json.JSONDecodeError:
+                pass
+        return None
 
     def _parse_script_response(self, response):
         """解析 LLM 回傳的 JSON 腳本"""
