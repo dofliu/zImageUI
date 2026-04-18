@@ -11,10 +11,10 @@
         rel="stylesheet">
 </head>
 
-<body class="projects-body">
-    <header class="projects-header">
-        <div class="projects-header-content">
-            <div class="projects-logo">
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
                 <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -22,7 +22,7 @@
                 </svg>
                 <h1>Z-Image Studio</h1>
             </div>
-            <nav class="projects-nav">
+            <nav class="header-nav">
                 <a href="/" class="nav-link">生成器</a>
                 <a href="/projects" class="nav-link active">專案</a>
                 <a href="/gallery" class="nav-link">作品集</a>
@@ -30,16 +30,21 @@
                 <a href="/dashboard" class="nav-link">儀表板</a>
                 <a href="/api-docs" class="nav-link">API</a>
             </nav>
-        </div>
-    </header>
+            <button id="themeToggle" class="theme-toggle-btn" title="切換主題">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
+                    <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+        </header>
 
     <!-- 專案列表頁 -->
     <main id="projectListPage" class="projects-main">
         <div class="projects-title-bar">
-            <div>
-                <h2>專案管理</h2>
-                <p>將 AI 圖片組織到不同的工作專案中</p>
-            </div>
+            <h2>專案管理</h2>
             <div class="projects-title-actions">
                 <select id="statusFilter" class="status-filter">
                     <option value="">全部狀態</option>
@@ -144,6 +149,8 @@
         </div>
     </div>
 
+    </div><!-- .container -->
+    <script src="{{ url_for('static', filename='js/themeManager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/projectManager.js') }}"></script>
 </body>
 
