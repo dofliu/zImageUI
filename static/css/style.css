@@ -55,46 +55,38 @@ body[data-theme="light"] {
 
 /* Header Styles */
 .header {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem 0;
 }
 
 .logo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
+    gap: 0.6rem;
 }
 
 .logo-icon {
-    width: 42px;
-    height: 42px;
+    width: 28px;
+    height: 28px;
     color: var(--primary-color);
-    filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+    filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.4));
 }
 
 .header h1 {
-    font-size: 2rem;
+    font-size: 1.3rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-}
-
-.subtitle {
-    color: var(--text-secondary);
-    font-size: 1rem;
-    margin-top: 0.5rem;
+    white-space: nowrap;
 }
 
 /* Theme Toggle Button */
 .theme-toggle-btn {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
     background: var(--surface);
     border: 1px solid var(--border-color);
     border-radius: 50%;
@@ -135,11 +127,25 @@ body[data-theme="light"] {
     display: block;
 }
 
-.header {
-    position: relative;
+/* 全寬內容區（作品集、專案、儀表板等） */
+.page-content {
+    width: 100%;
 }
 
-/* 兩欄式布局 */
+.page-title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.page-title-bar h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* 兩欄式布局（生成器頁面） */
 .main-layout {
     display: grid;
     grid-template-columns: 400px 1fr;
@@ -818,51 +824,15 @@ textarea::placeholder {
 
 /* Welcome Section */
 .welcome-section {
-    flex: 1;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    text-align: center;
-    padding: 3rem 2rem;
+    padding: 4rem 2rem;
 }
 
-.welcome-icon {
-    width: 80px;
-    height: 80px;
-    color: var(--primary-color);
-    margin-bottom: 1.5rem;
-    opacity: 0.8;
-}
-
-.welcome-section h2 {
-    font-size: 1.75rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-}
-
-.welcome-section>p {
-    color: var(--text-secondary);
-    font-size: 1.05rem;
-    margin-bottom: 2rem;
-    max-width: 500px;
-}
-
-.welcome-features {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.feature {
-    background: var(--background);
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
+.welcome-hint {
+    color: var(--text-muted);
+    font-size: 1rem;
 }
 
 /* Error Section */
@@ -911,14 +881,6 @@ textarea::placeholder {
 }
 
 /* Footer */
-.footer {
-    text-align: center;
-    margin-top: 1.5rem;
-    padding: 1rem;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-}
-
 /* Scrollbar Styles */
 .sidebar::-webkit-scrollbar,
 .history-list::-webkit-scrollbar {
