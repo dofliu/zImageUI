@@ -546,9 +546,13 @@
         if (!currentStory) return;
 
         // 確認操作
-        const hasContent = currentStory.panels.some(p => p.scene_description);
-        if (hasContent) {
-            if (!confirm('AI 將會覆寫目前的面板描述，確定要繼續嗎？')) return;
+        const hasPanelContent = currentStory.panels.some(p => p.scene_description);
+        const hasCharacters = (currentStory.characters || []).length > 0;
+        const warnings = [];
+        if (hasPanelContent) warnings.push('目前的面板描述將被覆寫');
+        if (hasCharacters) warnings.push('將跳過角色生成（已有角色）');
+        if (warnings.length && hasPanelContent) {
+            if (!confirm('AI 將會執行：\n- ' + warnings.join('\n- ') + '\n\n確定要繼續嗎？')) return;
         }
 
         const btn = document.getElementById('aiScriptBtn');
@@ -565,13 +569,17 @@
                 return;
             }
 
+            btn.textContent = hasCharacters ? 'AI 撰寫腳本中...' : 'AI 構思角色+腳本中...';
+
             const res = await fetch(`/api/stories/${currentStory.id}/generate-script`, { method: 'POST' });
             const data = await res.json();
 
             if (data.success) {
-                // 重新載入故事資料並刷新面板
                 await openStory(currentStory.id);
-                alert(`腳本生成完成！已自動填入 ${data.panels.length} 個面板的場景描述。\n\n你可以檢查並修改後再生成圖片。`);
+                const msgs = [];
+                if (data.characters_created) msgs.push(`✓ 自動建立 ${data.characters_created} 個角色`);
+                msgs.push(`✓ 填入 ${data.panels.length} 個面板的場景`);
+                alert('AI 生成完成！\n\n' + msgs.join('\n') + '\n\n你可以檢查並修改後再生成圖片。');
             } else {
                 alert('腳本生成失敗: ' + (data.error || '未知錯誤'));
             }

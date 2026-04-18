@@ -27,6 +27,15 @@
                 <a href="/dashboard" class="nav-link">儀表板</a>
                 <a href="/api-docs" class="nav-link">API</a>
             </nav>
+            <button id="themeToggle" class="theme-toggle-btn" title="切換主題">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
+                    <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
         </header>
 
         <!-- 故事列表視圖 -->
@@ -126,7 +135,7 @@
                     <div class="panels-header">
                         <h3>面板編輯</h3>
                         <div class="panels-actions">
-                            <button id="aiScriptBtn" class="ai-script-btn" title="讓 AI 自動生成每個面板的場景描述">AI 生成腳本</button>
+                            <button id="aiScriptBtn" class="ai-script-btn" title="讓 AI 自動構思角色並生成每個面板的場景描述">AI 一鍵生成</button>
                             <span id="layoutLabel" class="layout-label">四格漫畫</span>
                             <button id="addPanelBtn" class="add-inline-btn" title="新增面板">+</button>
                         </div>

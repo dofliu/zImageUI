@@ -2,94 +2,15 @@
    Dashboard Styles
    =========================== */
 
-.dashboard-body {
-    margin: 0;
-    font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
-    color: #e0e0e0;
-    min-height: 100vh;
+.dashboard-main {
+    padding: 0;
 }
 
-.dashboard-header {
-    background: rgba(15, 15, 26, 0.9);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
-    padding: 0 2rem;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.dashboard-header-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 64px;
-}
-
-.dashboard-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.dashboard-logo .logo-icon {
-    width: 28px;
-    height: 28px;
-    color: #8b5cf6;
-}
-
-.dashboard-logo h1 {
+.dashboard-main > h2 {
     font-size: 1.3rem;
     font-weight: 600;
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 0;
-}
-
-.dashboard-nav {
-    display: flex;
-    gap: 20px;
-}
-
-.dashboard-nav .nav-link {
-    color: #999;
-    text-decoration: none;
-    font-size: 0.9rem;
-    padding: 8px 0;
-    border-bottom: 2px solid transparent;
-    transition: all 0.3s;
-}
-
-.dashboard-nav .nav-link:hover,
-.dashboard-nav .nav-link.active {
-    color: #8b5cf6;
-    border-bottom-color: #8b5cf6;
-}
-
-.dashboard-main {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 30px 2rem 60px;
-}
-
-.dashboard-title {
-    margin-bottom: 30px;
-}
-
-.dashboard-title h2 {
-    font-size: 1.8rem;
-    margin: 0 0 6px;
-    color: #e0e0e0;
-}
-
-.dashboard-title p {
-    color: #888;
-    margin: 0;
+    margin: 0 0 1.5rem;
+    color: var(--text-primary);
 }
 
 /* Stats Grid */
