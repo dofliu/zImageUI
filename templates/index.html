@@ -4,557 +4,424 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z-Image Studio - AI 圖片生成平台</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
-        rel="stylesheet">
+    <title>Z-Image Studio · Atelier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/atelier-style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
-<body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">
-                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-                <h1>Z-Image Studio</h1>
-            </div>
-            <nav class="header-nav">
-                <a href="/" class="nav-link active">生成器</a>
-                <a href="/projects" class="nav-link">專案</a>
-                <a href="/gallery" class="nav-link">作品集</a>
-                <a href="/story" class="nav-link">漫畫工作室</a>
-                <a href="/dashboard" class="nav-link">儀表板</a>
-                <a href="/api-docs" class="nav-link">API</a>
+<body class="atelier">
+    <div class="at-app">
+        <!-- ============== TOP BAR ============== -->
+        <header class="at-topbar">
+            <div class="at-logo">Z—Image<sup>· ATELIER</sup></div>
+            <nav class="at-nav">
+                <a href="/" class="on">工作室</a>
+                <a href="/gallery">作品集</a>
+                <a href="/projects">專案</a>
+                <a href="/story">漫畫工作室</a>
+                <a href="/dashboard">儀表板</a>
+                <a href="/api-docs">API</a>
             </nav>
+            <div class="at-spacer"></div>
 
-            <!-- 主題切換按鈕 -->
-            <button id="themeToggle" class="theme-toggle-btn" title="切換主題">
+            <!-- 模型狀態(原：modelSelectorContainer) -->
+            <div id="modelSelectorContainer" class="at-model-chip">
+                <div class="model-status loading">
+                    <div class="model-status-spinner"></div>
+                    <div class="model-status-info">
+                        <span class="model-status-name">載入中...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="at-search">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input placeholder="搜尋作品、提示詞、標籤…" />
+                <span class="kbd">⌘K</span>
+            </div>
+
+            <!-- 主題切換(保留原功能) -->
+            <button id="themeToggle" class="at-icon-btn" title="切換主題">
                 <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
-                    <path
-                        d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
                 <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </button>
         </header>
 
-        <!-- 兩欄式布局 -->
-        <div class="main-layout">
-            <!-- 左側：輸入區域 -->
-            <aside class="sidebar">
-                <div class="input-section">
-                    <!-- 模型狀態 -->
-                    <div id="modelSelectorContainer" class="model-selector-container">
-                        <div class="model-status loading">
-                            <div class="model-status-spinner"></div>
-                            <div class="model-status-info">
-                                <span class="model-status-name">載入中...</span>
-                            </div>
-                        </div>
+        <!-- ============== LEFT: COMPOSE ============== -->
+        <aside class="at-compose">
+
+            <div class="at-kicker">新作品 · Session</div>
+            <h2 class="at-title"><span class="n">01</span>構思</h2>
+
+            <!-- 模式切換 -->
+            <div class="at-seg">
+                <button id="singleModeBtn" class="at-seg-btn mode-btn on">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+                    單張
+                </button>
+                <button id="batchModeBtn" class="at-seg-btn mode-btn">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="1.5"/><rect x="7" y="7" width="14" height="14" rx="1.5"/></svg>
+                    批量
+                </button>
+                <button id="img2imgModeBtn" class="at-seg-btn mode-btn">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    圖生圖
+                </button>
+            </div>
+
+            <!-- 單張模式 -->
+            <div id="singleModeInput" class="input-wrapper">
+                <div class="main-prompt-area">
+                    <label for="prompt" class="at-kicker" style="margin-top:8px">提示詞</label>
+                    <div class="prompt-input-wrapper">
+                        <textarea id="prompt" class="at-prompt" placeholder="描述你想看見的畫面…" rows="4"></textarea>
+                        <div id="promptSuggestions" class="prompt-suggestions" style="display:none;"></div>
+                    </div>
+                    <div class="at-actions">
+                        <button id="enhancePromptBtn" class="at-mini-btn enhance-prompt-btn" title="增加細節與品質關鍵字">
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+                            增強
+                        </button>
+                        <button id="aiExpandPromptBtn" class="at-mini-btn ai-expand-btn" title="AI 擴展" disabled>
+                            🤖 AI 擴展
+                        </button>
+                        <span class="at-charcount"><span id="charCount">0 字</span></span>
                     </div>
 
-                    <!-- 模式切換 -->
-                    <div class="mode-switch">
-                        <button id="singleModeBtn" class="mode-btn active">單張生成</button>
-                        <button id="batchModeBtn" class="mode-btn">批量生成</button>
-                        <button id="img2imgModeBtn" class="mode-btn">圖生圖</button>
-                    </div>
-
-                    <!-- 單張模式輸入 -->
-                    <div id="singleModeInput" class="input-wrapper">
-                        <!-- 1. 核心輸入區域 -->
-                        <div class="main-prompt-area">
-                            <label for="prompt">您想生成什麼樣的圖片？</label>
-                            <div class="prompt-input-wrapper">
-                                <textarea id="prompt" placeholder="例如：一隻貓咪坐在窗邊，溫暖的陽光... (輸入時會自動顯示建議)"
-                                    rows="4"></textarea>
-                                <!-- 自動完成建議框 -->
-                                <div id="promptSuggestions" class="prompt-suggestions" style="display: none;"></div>
-                            </div>
-
-                            <div class="prompt-assistant-controls">
-                                <button id="enhancePromptBtn" class="enhance-prompt-btn" title="增加細節與品質關鍵字">
-                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 3v18M5.5 5.5l13 13M18.5 5.5l-13 13" stroke="currentColor"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    增強提示詞
-                                </button>
-                                <button id="aiExpandPromptBtn" class="ai-expand-btn" title="由 AI 幫您擴展點子" disabled>
-                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                    </svg>
-                                    🤖 AI 擴展
-                                </button>
-                                <div class="char-count-wrapper">
-                                    <span class="char-count" id="charCount">0 字</span>
-                                </div>
-                            </div>
+                    <!-- AI 助手 -->
+                    <div class="llm-section compact at-subcard">
+                        <div class="llm-header">
+                            <span class="llm-title">AI 助手</span>
+                            <span id="llmStatus" class="llm-status status-idle">未載入</span>
                         </div>
-
-                        <!-- 2. AI 助手設定 (緊湊版) -->
-                        <div class="llm-section compact">
-                            <div class="llm-header">
-                                <span class="llm-title">🤖 AI 助手設定</span>
-                                <span id="llmStatus" class="llm-status status-idle">未載入</span>
+                        <div class="llm-controls-row">
+                            <div class="llm-model-group">
+                                <select id="llmModelSelect" class="llm-select at-select">
+                                    <option value="">選擇訓練模型</option>
+                                </select>
+                                <button id="loadLlmModelBtn" class="llm-load-btn" title="載入">⟳</button>
+                                <button id="unloadLlmModelBtn" class="llm-unload-btn" title="卸載" style="display:none;">✕</button>
                             </div>
-
-                            <div class="llm-controls-row">
-                                <div class="llm-model-group">
-                                    <select id="llmModelSelect" class="llm-select">
-                                        <option value="">選擇訓練模型</option>
-                                    </select>
-                                    <button id="loadLlmModelBtn" class="llm-load-btn" title="載入模型">⟳</button>
-                                    <button id="unloadLlmModelBtn" class="llm-unload-btn" title="卸載模型"
-                                        style="display: none;">✕</button>
-                                </div>
-                                <div class="llm-style-group">
-                                    <select id="llmStyleSelect" class="llm-style-select">
-                                        <option value="通用">風格：通用</option>
-                                        <option value="寫實攝影">風格：寫實</option>
-                                        <option value="動漫插畫">風格：動漫</option>
-                                        <option value="油畫藝術">風格：油畫</option>
-                                        <option value="賽博龐克">風格：龐克</option>
-                                        <option value="奇幻魔法">風格：奇幻</option>
-                                    </select>
-                                </div>
+                            <div class="llm-style-group">
+                                <select id="llmStyleSelect" class="llm-style-select at-select">
+                                    <option value="通用">風格：通用</option>
+                                    <option value="寫實攝影">風格：寫實</option>
+                                    <option value="動漫插畫">風格：動漫</option>
+                                    <option value="油畫藝術">風格：油畫</option>
+                                    <option value="賽博龐克">風格：龐克</option>
+                                    <option value="奇幻魔法">風格：奇幻</option>
+                                </select>
                             </div>
-                        </div>
-
-                        <!-- 3. 進階參數設定 (預設折疊) -->
-                        <div class="advanced-settings-section">
-                            <div class="advanced-header" id="toggleAdvancedSettings">
-                                <span>⚙️ 進階參數與範本</span>
-                                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </div>
-
-                            <div class="advanced-content" id="advancedSettingsContent" style="display: none;">
-                                <!-- 風格選擇器 -->
-                                <div class="style-selector inner-setting">
-                                    <label>風格模板</label>
-                                    <div class="select-with-refresh">
-                                        <select id="styleSelect" class="style-select">
-                                            <option value="">無風格（使用原始提示詞）</option>
-                                        </select>
-                                        <button id="refreshStylesBtn" class="refresh-btn">⟳</button>
-                                    </div>
-                                </div>
-
-                                <!-- 尺寸選擇器 -->
-                                <div class="size-selector inner-setting">
-                                    <label>圖片尺寸</label>
-                                    <select id="sizeSelect" class="size-select">
-                                        <option value="default">預設尺寸 (768x768)</option>
-                                    </select>
-                                </div>
-
-                                <!-- 提示詞範本 -->
-                                <div class="prompt-template-selector inner-setting">
-                                    <label>提示詞範本</label>
-                                    <div class="template-select-wrapper">
-                                        <select id="promptTemplateSelect" class="template-select">
-                                            <option value="">選擇範本...</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Seed 控制器 -->
-                                <div class="seed-control inner-setting">
-                                    <div class="seed-checkbox-wrapper">
-                                        <input type="checkbox" id="useSeed" class="seed-checkbox">
-                                        <label for="useSeed">固定隨機種子</label>
-                                    </div>
-                                    <div class="seed-input-wrapper">
-                                        <input type="number" id="seedInput" class="seed-input" placeholder="Seed 數值"
-                                            disabled>
-                                        <button id="randomSeedBtn" class="random-seed-btn">🎲</button>
-                                    </div>
-                                </div>
-
-                                <!-- 負面提示詞 -->
-                                <div class="negative-prompt-inner inner-setting">
-                                    <label>負面提示詞 (Negative Prompt)</label>
-                                    <textarea id="negativePrompt" placeholder="不想出現的元素..." rows="2"></textarea>
-                                </div>
-
-                                <!-- 收藏夾 -->
-                                <div class="favorites-inner inner-setting">
-                                    <div class="fav-header">
-                                        <label>收藏的提示詞</label>
-                                        <button id="addFavoriteBtn" class="add-favorite-btn" title="收藏當前">
-                                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div id="favoritesList" class="favorites-list mini">
-                                        <!-- 由 JS 動態填充 -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 批量模式輸入 -->
-                    <div id="batchModeInput" class="input-wrapper" style="display: none;">
-                        <label for="batchPrompts">批量提示詞（每行一個）</label>
-                        <textarea id="batchPrompts"
-                            placeholder="水彩風格的貓咪&#10;油畫風格的日落&#10;賽博龐克風格的城市&#10;&#10;最多 20 個提示詞，每行一個"
-                            rows="10"></textarea>
-                        <div class="input-info">
-                            <span class="tip">💡 每行一個提示詞，最多 20 個</span>
-                            <span class="batch-count" id="batchCount">0 個提示詞</span>
-                        </div>
-                    </div>
-
-                    <!-- 圖生圖區域 -->
-                    <div id="img2imgSection" class="input-wrapper img2img-section" style="display: none;">
-                        <label>參考圖片</label>
-                        <div id="img2imgDropZone" class="img2img-drop-zone">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
-                                <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <p>拖放圖片到這裡，或點擊選擇</p>
-                            <span class="drop-zone-hint">支援 JPG、PNG、WebP（最大 20MB）</span>
-                        </div>
-                        <input type="file" id="img2imgFileInput" accept="image/*" style="display: none;">
-                        <div id="img2imgPreview" class="img2img-preview" style="display: none;"></div>
-                        <div id="img2imgControls" class="img2img-controls" style="display: none;">
-                            <div class="strength-control">
-                                <label for="img2imgStrength">
-                                    轉換強度: <span id="strengthValue">0.75</span>
-                                </label>
-                                <input type="range" id="img2imgStrength" min="0.1" max="1.0" step="0.05" value="0.75">
-                                <div class="strength-labels">
-                                    <span>微調</span>
-                                    <span>完全重繪</span>
-                                </div>
-                            </div>
-                            <div class="img2img-actions">
-                                <button id="clearReferenceBtn" class="clear-ref-btn">清除參考圖</button>
-                                <button id="generateVariationsBtn" class="variations-btn">生成 4 個變體</button>
-                            </div>
-                        </div>
-                        <div id="variationResults" class="variation-results" style="display: none;"></div>
-                    </div>
-
-                    <button id="generateBtn" class="generate-btn">
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        <span id="btnText">開始生成圖片</span>
-                    </button>
-
-                    <!-- 批量進度顯示 -->
-                    <div id="batchProgress" class="batch-progress" style="display: none;">
-                        <div class="progress-text">
-                            正在生成: <span id="currentProgress">0</span> / <span id="totalProgress">0</span>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div id="batchProgressBar" class="progress-bar-fill"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 標籤雲區域 -->
-                <div class="tags-section">
-                    <div class="tags-header">
-                        <h3>
-                            <svg class="tags-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <line x1="7" y1="7" x2="7.01" y2="7" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" />
-                            </svg>
-                            標籤篩選
-                        </h3>
-                        <button id="clearFilterBtn" class="clear-filter-btn" title="清除篩選">✕</button>
+                <!-- 參數列 (摺疊) -->
+                <div class="at-kicker" style="margin-top:24px">參數 · Parameters</div>
+                <div class="at-field advanced-settings-section">
+                    <div class="at-field-row inner-setting style-selector">
+                        <div class="at-field-label">Style</div>
+                        <div class="at-field-val">
+                            <div class="select-with-refresh">
+                                <select id="styleSelect" class="style-select at-select-inline">
+                                    <option value="">無風格</option>
+                                </select>
+                                <button id="refreshStylesBtn" class="refresh-btn">⟳</button>
+                            </div>
+                        </div>
                     </div>
-                    <div id="tagCloud" class="tag-cloud">
-                        <p class="no-tags">尚無標籤</p>
-                    </div>
-                </div>
-
-                <!-- 提示詞庫 -->
-                <div class="prompt-library-section">
-                    <div class="pl-header" id="togglePromptLibrary">
-                        <h3>
-                            <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
-                                <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M6.5 2H20V22H6.5A2.5 2.5 0 014 19.5V4.5A2.5 2.5 0 016.5 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            提示詞庫
-                        </h3>
-                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" width="18" height="18">
-                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <div id="promptLibraryPanel" class="pl-panel" style="display: none;">
-                        <div class="pl-controls">
-                            <input type="text" id="plSearch" class="pl-search" placeholder="搜尋提示詞...">
-                            <select id="plSort" class="pl-sort-select">
-                                <option value="rating">評分排序</option>
-                                <option value="use_count">使用次數</option>
-                                <option value="newest">最新</option>
+                    <div class="at-field-row inner-setting size-selector">
+                        <div class="at-field-label">Size</div>
+                        <div class="at-field-val">
+                            <select id="sizeSelect" class="size-select at-select-inline">
+                                <option value="default">預設 (768×768)</option>
                             </select>
-                            <button id="plAddBtn" class="pl-add-btn" title="新增提示詞">+</button>
-                        </div>
-                        <div id="plCategories" class="pl-categories"></div>
-                        <div id="plGrid" class="pl-grid"></div>
-                    </div>
-                </div>
-
-                <!-- 歷史記錄區域 -->
-                <div class="history-section">
-                    <div class="history-header">
-                        <h3>
-                            <svg class="history-icon" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" />
-                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
-                            </svg>
-                            歷史記錄
-                        </h3>
-                        <div class="history-actions">
-                            <button id="toggleSelectModeBtn" class="select-mode-btn" title="多選模式">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 11L12 14L22 4" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                    <path
-                                        d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                            </button>
-                            <button id="clearHistoryBtn" class="clear-btn" title="清除所有歷史">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                            </button>
                         </div>
                     </div>
-
-                    <!-- 批量操作工具欄 -->
-                    <div id="batchToolbar" class="batch-toolbar" style="display: none;">
-                        <div class="batch-toolbar-content">
-                            <button id="selectAllBtn" class="batch-btn">全選</button>
-                            <button id="deselectAllBtn" class="batch-btn">取消全選</button>
-                            <span class="selected-count">已選 <strong id="selectedCount">0</strong> 張</span>
-                            <button id="deleteBtn" class="delete-btn" disabled>
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                                刪除
-                            </button>
-                            <button id="exportBtn" class="export-btn" disabled>
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                    <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                                導出
-                            </button>
+                    <div class="at-field-row inner-setting prompt-template-selector">
+                        <div class="at-field-label">Template</div>
+                        <div class="at-field-val">
+                            <select id="promptTemplateSelect" class="template-select at-select-inline">
+                                <option value="">選擇範本…</option>
+                            </select>
                         </div>
                     </div>
-
-                    <div id="historyList" class="history-list">
-                        <p class="history-empty">尚無歷史記錄</p>
+                    <div class="at-field-row inner-setting seed-control">
+                        <div class="at-field-label">Seed</div>
+                        <div class="at-field-val at-seed-row">
+                            <label class="seed-checkbox-wrapper">
+                                <input type="checkbox" id="useSeed" class="seed-checkbox">
+                                <span>固定</span>
+                            </label>
+                            <input type="number" id="seedInput" class="seed-input at-seed-input" placeholder="—" disabled>
+                            <button id="randomSeedBtn" class="random-seed-btn">🎲</button>
+                        </div>
+                    </div>
+                    <div class="at-field-row inner-setting negative-prompt-inner">
+                        <div class="at-field-label">Negative</div>
+                        <div class="at-field-val" style="width:100%">
+                            <textarea id="negativePrompt" class="at-neg" placeholder="不想出現的元素…" rows="1"></textarea>
+                        </div>
+                    </div>
+                    <div class="at-field-row inner-setting favorites-inner">
+                        <div class="at-field-label">Favorites</div>
+                        <div class="at-field-val" style="width:100%">
+                            <div class="fav-header" style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                                <button id="addFavoriteBtn" class="at-mini-btn add-favorite-btn" title="收藏當前">
+                                    ★ 收藏目前
+                                </button>
+                            </div>
+                            <div id="favoritesList" class="favorites-list mini at-faves"></div>
+                        </div>
                     </div>
                 </div>
-            </aside>
+            </div>
 
-            <!-- 右側：結果顯示區域 -->
-            <main class="main-content">
-                <!-- 載入中 -->
-                <div id="loadingSection" class="loading-section" style="display: none;">
-                    <div class="spinner"></div>
-                    <p class="loading-text">正在生成您的圖片，請稍候...</p>
-                    <p class="loading-subtext">這可能需要幾秒鐘</p>
+            <!-- 批量模式 -->
+            <div id="batchModeInput" class="input-wrapper" style="display:none;">
+                <label for="batchPrompts" class="at-kicker" style="margin-top:8px">批量提示詞（每行一個）</label>
+                <textarea id="batchPrompts" class="at-prompt" rows="10" placeholder="水彩風格的貓咪&#10;油畫風格的日落&#10;賽博龐克風格的城市&#10;&#10;最多 20 個提示詞，每行一個"></textarea>
+                <div class="input-info">
+                    <span class="tip">每行一個 · 最多 20 個</span>
+                    <span class="batch-count" id="batchCount">0 個提示詞</span>
                 </div>
-                <!-- 單張生成結果 -->
-                <div id="resultSection" class="result-section" style="display: none;">
-                    <div class="result-header">
-                        <h2>生成結果</h2>
-                        <button id="downloadBtn" class="download-btn">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
-                            下載圖片
+            </div>
+
+            <!-- 圖生圖 -->
+            <div id="img2imgSection" class="input-wrapper img2img-section" style="display:none;">
+                <label class="at-kicker" style="margin-top:8px">參考圖片</label>
+                <div id="img2imgDropZone" class="img2img-drop-zone at-dropzone">
+                    <svg viewBox="0 0 24 24" fill="none" width="40" height="40" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15"/>
+                        <path d="M17 8L12 3L7 8"/>
+                        <path d="M12 3V15"/>
+                    </svg>
+                    <p>拖放圖片到這裡，或點擊選擇</p>
+                    <span class="drop-zone-hint">JPG · PNG · WebP · 最大 20MB</span>
+                </div>
+                <input type="file" id="img2imgFileInput" accept="image/*" style="display:none;">
+                <div id="img2imgPreview" class="img2img-preview" style="display:none;"></div>
+                <div id="img2imgControls" class="img2img-controls" style="display:none;">
+                    <div class="strength-control">
+                        <label for="img2imgStrength">轉換強度：<span id="strengthValue">0.75</span></label>
+                        <input type="range" id="img2imgStrength" min="0.1" max="1.0" step="0.05" value="0.75">
+                        <div class="strength-labels"><span>微調</span><span>完全重繪</span></div>
+                    </div>
+                    <div class="img2img-actions">
+                        <button id="clearReferenceBtn" class="clear-ref-btn at-mini-btn">清除參考</button>
+                        <button id="generateVariationsBtn" class="variations-btn at-mini-btn">生成 4 個變體</button>
+                    </div>
+                </div>
+                <div id="variationResults" class="variation-results" style="display:none;"></div>
+            </div>
+
+            <!-- 生成按鈕 -->
+            <button id="generateBtn" class="at-cta generate-btn">
+                <span><small>COMPOSE · </small><span id="btnText">開始生成</span></span>
+                <span class="arrow">→</span>
+            </button>
+
+            <!-- 批量進度 -->
+            <div id="batchProgress" class="batch-progress at-progress" style="display:none;">
+                <div class="progress-text">正在生成 <span id="currentProgress">0</span> / <span id="totalProgress">0</span></div>
+                <div class="progress-bar-container"><div id="batchProgressBar" class="progress-bar-fill"></div></div>
+            </div>
+
+            <!-- 標籤區 -->
+            <div class="at-kicker" style="margin-top:28px">標籤</div>
+            <div class="tags-section at-tags-section">
+                <div class="tags-header">
+                    <button id="clearFilterBtn" class="clear-filter-btn" title="清除篩選" style="float:right">✕</button>
+                </div>
+                <div id="tagCloud" class="tag-cloud at-tags">
+                    <p class="no-tags" style="color:var(--ink-3); font-size:11px;">尚無標籤</p>
+                </div>
+            </div>
+
+            <!-- 提示詞庫 -->
+            <div class="prompt-library-section at-section">
+                <div class="pl-header at-kicker-clickable" id="togglePromptLibrary">
+                    <span class="at-kicker" style="margin-top:20px">提示詞庫</span>
+                    <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" width="14" height="14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9L12 16L5 9"/></svg>
+                </div>
+                <div id="promptLibraryPanel" class="pl-panel" style="display:none;">
+                    <div class="pl-controls">
+                        <input type="text" id="plSearch" class="pl-search at-input" placeholder="搜尋提示詞...">
+                        <select id="plSort" class="pl-sort-select at-select-inline">
+                            <option value="rating">評分排序</option>
+                            <option value="use_count">使用次數</option>
+                            <option value="newest">最新</option>
+                        </select>
+                        <button id="plAddBtn" class="pl-add-btn at-mini-btn" title="新增提示詞">+</button>
+                    </div>
+                    <div id="plCategories" class="pl-categories"></div>
+                    <div id="plGrid" class="pl-grid"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ============== CENTER: WORK ============== -->
+        <main class="at-work main-content">
+            <!-- 初始畫面 -->
+            <div id="welcomeSection" class="at-welcome welcome-section">
+                <div class="at-worknum" style="font-size:180px; opacity:0.08; line-height:0.85;">01</div>
+                <p class="at-welcome-text welcome-hint">
+                    輸入提示詞<br/>開始第一件作品
+                </p>
+                <div class="at-welcome-hint">
+                    <span>⌘</span> <span>+</span> <span>↵</span> 快速生成
+                </div>
+            </div>
+
+            <!-- 載入中 -->
+            <div id="loadingSection" class="at-loading loading-section" style="display:none;">
+                <div class="at-spinner spinner"></div>
+                <p class="loading-text at-loading-title">正在繪製您的作品…</p>
+                <p class="loading-subtext at-loading-sub">通常需要 5 ~ 8 秒</p>
+            </div>
+
+            <!-- 單張結果 -->
+            <div id="resultSection" class="at-result result-section" style="display:none;">
+                <div class="at-work-head result-header">
+                    <div class="at-worknum" id="atWorkNum">01</div>
+                    <div class="at-workinfo">
+                        <h2>Plate <span id="atPlateNo">001</span></h2>
+                        <p class="at-plate-meta" id="atPlateMeta">— · SEED — · —</p>
+                    </div>
+                    <div class="at-work-spacer"></div>
+                    <div class="at-work-tools">
+                        <div class="action-dropdown">
+                            <button id="addToProjectBtn" class="at-iconbtn action-btn project-action-btn" title="加入專案">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2v11z"/></svg>
+                            </button>
+                            <div id="projectDropdown" class="dropdown-menu" style="display:none;"></div>
+                        </div>
+                        <div class="action-dropdown">
+                            <button id="addToGalleryBtn" class="at-iconbtn action-btn gallery-action-btn" title="加入作品集">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"/><path d="M21 15L16 10L5 21"/></svg>
+                            </button>
+                            <div id="galleryDropdown" class="dropdown-menu" style="display:none;"></div>
+                        </div>
+                        <button id="compareBtn" class="at-iconbtn action-btn compare-action-btn" title="比較">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="8" height="18" rx="1"/><rect x="14" y="3" width="8" height="18" rx="1"/></svg>
+                        </button>
+                        <button id="downloadBtn" class="at-iconbtn download-btn" title="下載">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15"/><path d="M7 10L12 15L17 10"/><path d="M12 15V3"/></svg>
                         </button>
                     </div>
-
-                    <div class="image-container">
-                        <img id="generatedImage" src="" alt="生成的圖片">
-                    </div>
-
-                    <div class="result-info">
-                        <div class="result-prompt">
-                            <strong>提示詞：</strong>
-                            <p id="currentPrompt"></p>
-                        </div>
-                        <p class="filename" id="filename"></p>
-                    </div>
-
-                    <!-- 快捷操作按鈕 -->
-                    <div class="result-actions">
-                        <div class="action-dropdown">
-                            <button id="addToProjectBtn" class="action-btn project-action-btn">
-                                <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2v11z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                加入專案
-                            </button>
-                            <div id="projectDropdown" class="dropdown-menu" style="display: none;">
-                                <!-- 動態填充專案列表 -->
-                            </div>
-                        </div>
-                        <div class="action-dropdown">
-                            <button id="addToGalleryBtn" class="action-btn gallery-action-btn">
-                                <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><path d="M21 15L16 10L5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                加入作品集
-                            </button>
-                            <div id="galleryDropdown" class="dropdown-menu" style="display: none;">
-                                <!-- 動態填充作品集列表 -->
-                            </div>
-                        </div>
-                        <button id="compareBtn" class="action-btn compare-action-btn">
-                            <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><rect x="2" y="3" width="8" height="18" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="8" height="18" rx="1" stroke="currentColor" stroke-width="2"/></svg>
-                            比較
-                        </button>
-                    </div>
-
                 </div>
 
-                <!-- 批量生成結果 -->
-                <div id="batchResultSection" class="batch-result-section" style="display: none;">
-                    <div class="result-header">
+                <!-- 展示板 -->
+                <div class="at-plate image-container">
+                    <img id="generatedImage" src="" alt="生成的圖片">
+                    <div class="at-plate-cap result-info">
+                        <div>
+                            <div class="at-cap-k">PROMPT</div>
+                            <div class="at-cap-v result-prompt">
+                                <p id="currentPrompt"></p>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="at-cap-k">FILENAME</div>
+                            <div class="at-cap-v"><p class="filename" id="filename">—</p></div>
+                        </div>
+                        <div>
+                            <div class="at-cap-k">MODEL</div>
+                            <div class="at-cap-v">Z-Image-Turbo v2.5</div>
+                        </div>
+                        <div>
+                            <div class="at-cap-k">CREATED</div>
+                            <div class="at-cap-v" id="atCreated">—</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 批量結果 -->
+            <div id="batchResultSection" class="at-batch batch-result-section" style="display:none;">
+                <div class="at-work-head">
+                    <div class="at-worknum">︎批</div>
+                    <div class="at-workinfo">
                         <h2>批量生成結果</h2>
-                        <button id="batchDownloadBtn" class="download-btn">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
-                            下載全部 (ZIP)
-                        </button>
+                        <p class="batch-summary">成功 <strong id="batchSuccessCount">0</strong> 張 · 失敗 <strong id="batchFailCount">0</strong> 張</p>
                     </div>
+                    <div class="at-work-spacer"></div>
+                    <button id="batchDownloadBtn" class="at-iconbtn download-btn" title="下載全部 (ZIP)">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15"/><path d="M7 10L12 15L17 10"/><path d="M12 15V3"/></svg>
+                    </button>
+                </div>
+                <div id="batchResultGrid" class="batch-result-grid at-strip-grid"></div>
+            </div>
 
-                    <div class="batch-summary">
-                        <p>成功生成 <strong id="batchSuccessCount">0</strong> 張，失敗 <strong id="batchFailCount">0</strong> 張
-                        </p>
-                    </div>
+            <!-- 錯誤 -->
+            <div id="errorSection" class="at-error error-section" style="display:none;">
+                <div class="error-icon at-error-icon">⚠</div>
+                <h3>發生錯誤</h3>
+                <p id="errorMessage"></p>
+                <button id="retryBtn" class="at-cta retry-btn">重試</button>
+            </div>
 
-                    <div id="batchResultGrid" class="batch-result-grid">
-                        <!-- 批量結果將動態插入這裡 -->
+            <!-- 歷史索引條 (永遠顯示在 work 底部) -->
+            <section class="at-strip">
+                <div class="at-strip-head">
+                    <h3>最近作品 · Recent Plates</h3>
+                    <div class="history-actions" style="display:flex; gap:8px;">
+                        <button id="toggleSelectModeBtn" class="at-mini-btn select-mode-btn" title="多選">多選</button>
+                        <button id="clearHistoryBtn" class="at-mini-btn clear-btn" title="清除所有">清除</button>
                     </div>
                 </div>
 
-                <!-- 錯誤訊息 -->
-                <div id="errorSection" class="error-section" style="display: none;">
-                    <div class="error-icon">⚠️</div>
-                    <h3>發生錯誤</h3>
-                    <p id="errorMessage"></p>
-                    <button id="retryBtn" class="retry-btn">重試</button>
+                <!-- 批量工具列 -->
+                <div id="batchToolbar" class="batch-toolbar at-batchtools" style="display:none;">
+                    <div class="batch-toolbar-content">
+                        <button id="selectAllBtn" class="at-mini-btn batch-btn">全選</button>
+                        <button id="deselectAllBtn" class="at-mini-btn batch-btn">取消全選</button>
+                        <span class="selected-count">已選 <strong id="selectedCount">0</strong> 張</span>
+                        <button id="deleteBtn" class="at-mini-btn delete-btn" disabled>刪除</button>
+                        <button id="exportBtn" class="at-mini-btn export-btn" disabled>導出</button>
+                    </div>
                 </div>
 
-                <!-- 初始提示（生成前顯示） -->
-                <div id="welcomeSection" class="welcome-section">
-                    <p class="welcome-hint">輸入提示詞，開始生成圖片</p>
+                <div id="historyList" class="history-list at-strip-grid">
+                    <p class="history-empty" style="grid-column:1/-1; color:var(--ink-3); font-family: 'Noto Serif TC', serif; font-style:italic; text-align:center; padding: 32px 0;">尚無作品 — 去創作第一件吧</p>
                 </div>
-            </main>
-        </div>
+            </section>
+        </main>
     </div>
 
-    <!-- 導出選項對話框 -->
-    <div id="exportDialog" class="modal-overlay" style="display: none;">
-        <div class="modal-content export-modal">
+    <!-- ============== MODALS (保留原有) ============== -->
+    <!-- 導出對話框 -->
+    <div id="exportDialog" class="modal-overlay" style="display:none;">
+        <div class="modal-content export-modal at-modal">
             <div class="modal-header">
                 <h2>導出圖片集</h2>
                 <button id="closeExportDialog" class="modal-close-btn">✕</button>
             </div>
-
             <div class="modal-body">
-                <!-- 導出格式選擇 -->
                 <div class="export-option-group">
                     <label>導出格式</label>
                     <div class="format-buttons">
                         <button class="format-btn active" data-format="pdf">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
                             <span>PDF</span>
-                            <p class="format-desc">適合列印和文檔分享</p>
+                            <p class="format-desc">適合列印與文檔分享</p>
                         </button>
                         <button class="format-btn" data-format="ppt">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor"
-                                    stroke-width="2" />
-                                <path d="M3 9H21M9 21V9" stroke="currentColor" stroke-width="2" />
-                            </svg>
                             <span>PowerPoint</span>
-                            <p class="format-desc">適合簡報和教學</p>
+                            <p class="format-desc">適合簡報與教學</p>
                         </button>
                     </div>
                 </div>
-
-                <!-- 文檔標題 -->
                 <div class="export-option-group">
                     <label for="exportTitle">文檔標題</label>
-                    <input type="text" id="exportTitle" class="export-input" placeholder="輸入標題（例如：教學圖片集）" value="圖片集">
+                    <input type="text" id="exportTitle" class="export-input at-input" placeholder="例如：教學圖片集" value="圖片集">
                 </div>
-
-                <!-- 包含提示詞選項 -->
                 <div class="export-option-group">
                     <label class="checkbox-label">
                         <input type="checkbox" id="includePromptsCheck" checked>
@@ -562,39 +429,21 @@
                     </label>
                     <p class="option-hint">在 PDF/PPT 中顯示原始生成提示詞</p>
                 </div>
-
-                <!-- PDF 專用選項 -->
                 <div id="pdfOptions" class="export-option-group">
                     <label>PDF 版面</label>
                     <div class="layout-buttons">
-                        <button class="layout-btn active" data-layout="single">
-                            <span>單圖</span>
-                            <p class="layout-desc">一頁一張圖</p>
-                        </button>
-                        <button class="layout-btn" data-layout="grid">
-                            <span>網格</span>
-                            <p class="layout-desc">一頁兩張圖</p>
-                        </button>
+                        <button class="layout-btn active" data-layout="single"><span>單圖</span><p class="layout-desc">一頁一張</p></button>
+                        <button class="layout-btn" data-layout="grid"><span>網格</span><p class="layout-desc">一頁兩張</p></button>
                     </div>
                 </div>
-
-                <!-- PPT 專用選項 -->
-                <div id="pptOptions" class="export-option-group" style="display: none;">
+                <div id="pptOptions" class="export-option-group" style="display:none;">
                     <label>簡報主題</label>
                     <div class="theme-buttons">
-                        <button class="theme-btn active" data-theme="default">
-                            <span>預設</span>
-                        </button>
-                        <button class="theme-btn" data-theme="light">
-                            <span>淺色</span>
-                        </button>
-                        <button class="theme-btn" data-theme="dark">
-                            <span>深色</span>
-                        </button>
+                        <button class="theme-btn active" data-theme="default"><span>預設</span></button>
+                        <button class="theme-btn" data-theme="light"><span>淺色</span></button>
+                        <button class="theme-btn" data-theme="dark"><span>深色</span></button>
                     </div>
                 </div>
-
-                <!-- 已選圖片預覽 -->
                 <div class="export-option-group">
                     <label>已選圖片</label>
                     <div class="selected-preview">
@@ -602,27 +451,15 @@
                     </div>
                 </div>
             </div>
-
             <div class="modal-footer">
-                <button id="cancelExportBtn" class="modal-btn cancel-btn">取消</button>
-                <button id="confirmExportBtn" class="modal-btn confirm-btn">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                    開始導出
-                </button>
+                <button id="cancelExportBtn" class="modal-btn cancel-btn at-mini-btn">取消</button>
+                <button id="confirmExportBtn" class="modal-btn confirm-btn at-cta-sm">開始導出 →</button>
             </div>
         </div>
     </div>
 
-    <!-- 圖片比較疊層 -->
-    <div id="compareOverlay" class="compare-overlay" style="display: none;">
+    <!-- 比較疊層 -->
+    <div id="compareOverlay" class="compare-overlay at-compare" style="display:none;">
         <div class="compare-header">
             <h2>圖片比較</h2>
             <button id="closeCompareBtn" class="modal-close-btn">✕</button>
@@ -638,22 +475,9 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/themeManager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/favorites.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/templates.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/advanced.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/exportManager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/promptAssistant.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/llmManager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/modelSelector.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/img2imgManager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/actionButtons.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/promptLibrary.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-
     <!-- 新增提示詞對話框 -->
-    <div id="plAddDialog" class="modal-overlay" style="display: none;">
-        <div class="modal-content pl-add-modal">
+    <div id="plAddDialog" class="modal-overlay" style="display:none;">
+        <div class="modal-content pl-add-modal at-modal">
             <div class="modal-header">
                 <h2>新增提示詞到庫</h2>
                 <button id="plCancelBtn" class="modal-close-btn">✕</button>
@@ -661,19 +485,19 @@
             <div class="modal-body">
                 <div class="export-option-group">
                     <label for="plNewTitle">標題</label>
-                    <input type="text" id="plNewTitle" class="export-input" placeholder="例如：夢幻城堡">
+                    <input type="text" id="plNewTitle" class="export-input at-input" placeholder="例如：夢幻城堡">
                 </div>
                 <div class="export-option-group">
                     <label for="plNewPrompt">提示詞</label>
-                    <textarea id="plNewPrompt" rows="3" placeholder="輸入完整的提示詞..."></textarea>
+                    <textarea id="plNewPrompt" rows="3" class="at-input" placeholder="輸入完整的提示詞..."></textarea>
                 </div>
                 <div class="export-option-group">
                     <label for="plNewNeg">負面提示詞（選填）</label>
-                    <textarea id="plNewNeg" rows="2" placeholder="不想出現的元素..."></textarea>
+                    <textarea id="plNewNeg" rows="2" class="at-input" placeholder="不想出現的元素..."></textarea>
                 </div>
                 <div class="export-option-group">
                     <label for="plNewCategory">分類</label>
-                    <select id="plNewCategory" class="export-input">
+                    <select id="plNewCategory" class="export-input at-select-inline">
                         <option value="custom">自訂</option>
                         <option value="fantasy">奇幻魔法</option>
                         <option value="scifi">科幻未來</option>
@@ -688,15 +512,28 @@
                 </div>
                 <div class="export-option-group">
                     <label for="plNewTags">標籤（逗號分隔）</label>
-                    <input type="text" id="plNewTags" class="export-input" placeholder="例如：森林, 魔法, 夜晚">
+                    <input type="text" id="plNewTags" class="export-input at-input" placeholder="例如：森林, 魔法, 夜晚">
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="modal-btn cancel-btn" onclick="document.getElementById('plAddDialog').style.display='none'">取消</button>
-                <button id="plSaveBtn" class="modal-btn confirm-btn">儲存到提示詞庫</button>
+                <button class="modal-btn cancel-btn at-mini-btn" onclick="document.getElementById('plAddDialog').style.display='none'">取消</button>
+                <button id="plSaveBtn" class="modal-btn confirm-btn at-cta-sm">儲存 →</button>
             </div>
         </div>
     </div>
-</body>
 
+    <!-- 所有原 JS 保留 -->
+    <script src="{{ url_for('static', filename='js/themeManager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/favorites.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/templates.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/advanced.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/exportManager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/promptAssistant.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/llmManager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modelSelector.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/img2imgManager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/actionButtons.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/promptLibrary.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
 </html>

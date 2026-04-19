@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/story.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/atelier-global.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -41,7 +43,7 @@
         <!-- 故事列表視圖 -->
         <div id="storyListView" class="story-list-view">
             <div class="view-header">
-                <h2>漫畫工作室</h2>
+                <h2 data-n="04">漫畫工作室</h2>
                 <p>建立連貫風格的漫畫，讓角色和畫風在每一格中保持一致</p>
                 <button id="createStoryBtn" class="create-story-btn">+ 新建故事</button>
             </div>
