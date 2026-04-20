@@ -16,8 +16,6 @@ const retryBtn = document.getElementById('retryBtn');
 const historyList = document.getElementById('historyList');
 const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 const negativePromptInput = document.getElementById('negativePrompt');
-const toggleNegativePrompt = document.getElementById('toggleNegativePrompt');
-const negativePromptContent = document.getElementById('negativePromptContent');
 
 // 批量生成相關元素
 const singleModeBtn = document.getElementById('singleModeBtn');
@@ -54,18 +52,6 @@ if (promptInput && charCount) {
     promptInput.addEventListener('input', () => {
         const count = promptInput.value.length;
         charCount.textContent = `${count} 字`;
-    });
-}
-
-// 進階設定切換
-const toggleAdvancedSettings = document.getElementById('toggleAdvancedSettings');
-const advancedSettingsContent = document.getElementById('advancedSettingsContent');
-
-if (toggleAdvancedSettings && advancedSettingsContent) {
-    toggleAdvancedSettings.addEventListener('click', () => {
-        const isVisible = advancedSettingsContent.style.display !== 'none';
-        advancedSettingsContent.style.display = isVisible ? 'none' : 'grid';
-        toggleAdvancedSettings.classList.toggle('expanded', !isVisible);
     });
 }
 

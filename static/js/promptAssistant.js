@@ -38,12 +38,6 @@ function initPromptAssistant() {
     if (templateSelect) {
         templateSelect.addEventListener('change', handleTemplateSelect);
     }
-
-    // 綁定快速應用按鈕
-    const applyTemplateBtn = document.getElementById('applyTemplateBtn');
-    if (applyTemplateBtn) {
-        applyTemplateBtn.addEventListener('click', applyQuickTemplate);
-    }
 }
 
 // 載入提示詞範本
@@ -374,21 +368,14 @@ function showEnhancementToast(count, keywords) {
     }, 3000);
 }
 
-// 處理範本選擇
-function handleTemplateSelect(event) {
+// 處理範本選擇 — 新設計已移除二段式按鈕，選取即套用
+async function handleTemplateSelect(event) {
     const select = event.target;
-    const selectedOption = select.options[select.selectedIndex];
-
-    if (!selectedOption.value) return;
-
-    // 顯示應用按鈕
-    const applyBtn = document.getElementById('applyTemplateBtn');
-    if (applyBtn) {
-        applyBtn.style.display = 'inline-block';
-    }
+    if (!select.value) return;
+    await applyQuickTemplate();
 }
 
-// 快速應用範本
+// 套用範本（由 select 變更事件直接呼叫）
 async function applyQuickTemplate() {
     const select = document.getElementById('promptTemplateSelect');
     const promptInput = document.getElementById('prompt');
@@ -399,12 +386,8 @@ async function applyQuickTemplate() {
     }
 
     const templateId = select.value;
-    if (!templateId) {
-        alert('請選擇範本');
-        return;
-    }
+    if (!templateId) return;
 
-    // 獲取當前輸入作為主題
     const currentInput = promptInput.value.trim();
 
     try {
@@ -421,21 +404,9 @@ async function applyQuickTemplate() {
 
         if (response.ok) {
             const data = await response.json();
-
-            // 應用生成的提示詞
             promptInput.value = data.generated_prompt;
-
             console.log(`✓ 已應用範本: ${data.template_name}`);
-
-            // 隱藏應用按鈕
-            const applyBtn = document.getElementById('applyTemplateBtn');
-            if (applyBtn) {
-                applyBtn.style.display = 'none';
-            }
-
-            // 重置選擇器
             select.value = '';
-
         } else {
             const error = await response.json();
             alert(`應用範本失敗: ${error.error || '未知錯誤'}`);
