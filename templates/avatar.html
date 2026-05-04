@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-Image Studio · Avatar Studio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/atelier-style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/avatar.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="atelier">
+<div class="at-app">
+
+    <!-- ══ TOP BAR ══════════════════════════════════════════════ -->
+    <header class="at-topbar">
+        <div class="at-logo">Z—Image<sup>· ATELIER</sup></div>
+        <nav class="at-nav">
+            <a href="/">工作室</a>
+            <a href="/gallery">作品集</a>
+            <a href="/projects">專案</a>
+            <a href="/avatar" class="on">Avatar Studio</a>
+            <a href="/story">漫畫</a>
+            <a href="/dashboard">儀表板</a>
+        </nav>
+        <div class="at-spacer"></div>
+        <div id="modelSelectorContainer" class="at-model-chip">
+            <div class="model-status loading">
+                <div class="model-status-spinner"></div>
+                <div class="model-status-info">
+                    <span class="model-status-name">載入中...</span>
+                </div>
+            </div>
+        </div>
+        <button id="themeToggle" class="at-icon-btn" title="切換主題">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+    </header>
+
+    <!-- ══ MAIN LAYOUT ══════════════════════════════════════════ -->
+    <div class="avatar-layout">
+
+        <!-- ── 左側：功能選擇 ─────────────────────────────────── -->
+        <aside class="avatar-sidebar">
+            <div class="at-kicker">Avatar Studio</div>
+            <h2 class="at-title"><span class="n">AI</span>照片創作</h2>
+            <p class="avatar-subtitle">選擇功能，上傳照片，讓 AI 為你創作。<br>需搭配雲端模型（Gemini / GPT Image）。</p>
+
+            <!-- 功能網格 -->
+            <div id="featureGrid" class="feature-grid">
+                <!-- 由 JS 動態生成 -->
+                <div class="feature-loading">載入功能中…</div>
+            </div>
+
+            <!-- 雲端模型提示 -->
+            <div id="cloudModelHint" class="cloud-model-hint" style="display:none">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Avatar Studio 需要雲端模型。<br>
+                <a href="#" id="gotoSettingsLink">點此設定 API Key →</a>
+            </div>
+        </aside>
+
+        <!-- ── 中央：操作區 ───────────────────────────────────── -->
+        <main class="avatar-main">
+
+            <!-- 空狀態 -->
+            <div id="emptyState" class="avatar-empty">
+                <div class="avatar-empty-icon">🎨</div>
+                <div class="avatar-empty-title">選擇左側功能開始創作</div>
+                <div class="avatar-empty-desc">Avatar Studio 提供 15 種 AI 照片創作功能<br>從大頭照到動漫風格，一鍵完成</div>
+            </div>
+
+            <!-- 工作區（選定功能後顯示） -->
+            <div id="workArea" class="avatar-work" style="display:none">
+
+                <!-- 功能標題列 -->
+                <div class="avatar-work-header">
+                    <div class="avatar-work-title">
+                        <span id="featureIcon" class="avatar-feature-icon">🎨</span>
+                        <div>
+                            <div id="featureName" class="at-title" style="font-size:1.1rem;margin:0"></div>
+                            <div id="featureDesc" style="font-size:12px;opacity:.6;margin-top:2px"></div>
+                        </div>
+                    </div>
+                    <button id="backBtn" class="at-mini-btn">← 返回</button>
+                </div>
+
+                <!-- 圖片上傳區 -->
+                <div id="uploadSection" class="avatar-upload-section">
+                    <div class="avatar-upload-grid">
+                        <!-- 主圖上傳 -->
+                        <div id="imageUploadCard" class="upload-card">
+                            <div class="at-kicker">主圖片</div>
+                            <div id="dropZone1" class="avatar-dropzone" data-target="1">
+                                <div class="dropzone-placeholder" id="placeholder1">
+                                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+                                    <span>點擊或拖曳上傳</span>
+                                    <span style="font-size:11px;opacity:.5">JPG · PNG · WEBP</span>
+                                </div>
+                                <img id="preview1" class="dropzone-preview" style="display:none">
+                                <button id="clearImg1" class="dropzone-clear" style="display:none">✕</button>
+                            </div>
+                            <input type="file" id="fileInput1" accept="image/*" style="display:none">
+                        </div>
+
+                        <!-- 第二張圖（tryon/fusion） -->
+                        <div id="image2UploadCard" class="upload-card" style="display:none">
+                            <div class="at-kicker" id="image2Label">第二張圖片</div>
+                            <div id="dropZone2" class="avatar-dropzone" data-target="2">
+                                <div class="dropzone-placeholder" id="placeholder2">
+                                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+                                    <span>點擊或拖曳上傳</span>
+                                </div>
+                                <img id="preview2" class="dropzone-preview" style="display:none">
+                                <button id="clearImg2" class="dropzone-clear" style="display:none">✕</button>
+                            </div>
+                            <input type="file" id="fileInput2" accept="image/*" style="display:none">
+                        </div>
+                    </div>
+
+                    <!-- 遮罩畫布（inpaint） -->
+                    <div id="maskSection" style="display:none">
+                        <div class="at-kicker" style="margin-top:12px">繪製遮罩範圍</div>
+                        <div class="mask-canvas-wrapper">
+                            <canvas id="maskCanvas" class="mask-canvas"></canvas>
+                            <div class="mask-tools">
+                                <input type="range" id="brushSize" min="5" max="60" value="20" class="brush-size-slider" title="筆刷大小">
+                                <button class="at-mini-btn" id="clearMaskBtn">清除遮罩</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 功能參數 -->
+                <div id="paramsSection" class="avatar-params">
+                    <!-- 由 JS 動態生成各功能的參數表單 -->
+                </div>
+
+                <!-- 生成按鈕 -->
+                <div class="avatar-generate-row">
+                    <button id="generateBtn" class="avatar-generate-btn" disabled>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        開始生成
+                    </button>
+                    <div id="generateStatus" class="generate-status"></div>
+                </div>
+
+                <!-- 結果區 -->
+                <div id="resultSection" class="avatar-result" style="display:none">
+                    <div class="at-kicker">生成結果</div>
+                    <div class="result-image-wrap">
+                        <img id="resultImage" class="result-image" alt="生成結果">
+                    </div>
+                    <div class="result-actions">
+                        <a id="downloadBtn" class="at-mini-btn" download>⬇ 下載</a>
+                        <button id="useAsInputBtn" class="at-mini-btn">↩ 作為輸入圖</button>
+                        <a href="/gallery" class="at-mini-btn" style="opacity:.7">查看作品集</a>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div><!-- /.avatar-layout -->
+</div><!-- /.at-app -->
+
+<!-- ── Scripts ───────────────────────────────────────────────── -->
+<script src="{{ url_for('static', filename='js/themeManager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modelSelector.js') }}"></script>
+<script src="{{ url_for('static', filename='js/avatarManager.js') }}"></script>
+</body>
+</html>

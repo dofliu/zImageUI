@@ -10,38 +10,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/atelier-global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/atelier-style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
-<body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">
-                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                <h1>Z-Image Studio</h1>
-            </div>
-            <nav class="header-nav">
-                <a href="/" class="nav-link">工作室</a>
-                <a href="/gallery" class="nav-link">作品集</a>
-                <a href="/projects" class="nav-link">專案</a>
-                <a href="/story" class="nav-link">漫畫工作室</a>
-                <a href="/dashboard" class="nav-link active">儀表板</a>
-                <a href="/api-docs" class="nav-link">API</a>
-            </nav>
-            <button id="themeToggle" class="theme-toggle-btn" title="切換主題">
-                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
-                    <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                </svg>
-                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </button>
-        </header>
+<body class="atelier">
+        <!-- ══ TOP BAR ══════════════════════════════════════════════ -->
+    <header class="at-topbar">
+        <div class="at-logo">Z—Image<sup>· ATELIER</sup></div>
+        <nav class="at-nav">
+            <a href="/">工作室</a>
+            <a href="/gallery">作品集</a>
+            <a href="/projects">專案</a>
+            <a href="/avatar">Avatar Studio</a>
+            <a href="/story">漫畫</a>
+            <a href="/dashboard" class="on">儀表板</a>
+            <a href="/api-docs">API</a>
+        </nav>
+        <div class="at-spacer"></div>
+    <button id="themeToggle" class="at-icon-btn" title="切換主題">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+    </header>
+    <div class="at-page-content">
 
     <main class="dashboard-main">
         <h2 data-n="05">使用量儀表板</h2>
@@ -107,61 +99,4 @@
             <!-- 生成模式分佈 -->
             <div class="chart-card">
                 <h3>生成模式分佈</h3>
-                <div id="modeDistribution" class="usage-list">
-                    <p class="empty-data">載入中...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 佇列狀態 & 最近活動 -->
-        <div class="bottom-grid">
-            <!-- 佇列狀態 -->
-            <div class="panel-card">
-                <h3>生成佇列</h3>
-                <div id="queueStatus" class="queue-info">
-                    <div class="queue-stat">
-                        <span class="queue-label">等待中</span>
-                        <span class="queue-value" id="queuePending">0</span>
-                    </div>
-                    <div class="queue-stat">
-                        <span class="queue-label">處理中</span>
-                        <span class="queue-value processing" id="queueProcessing">0</span>
-                    </div>
-                    <div class="queue-stat">
-                        <span class="queue-label">已完成</span>
-                        <span class="queue-value completed" id="queueCompleted">0</span>
-                    </div>
-                    <div class="queue-stat">
-                        <span class="queue-label">失敗</span>
-                        <span class="queue-value failed" id="queueFailed">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- API 金鑰管理 -->
-            <div class="panel-card">
-                <div class="panel-header">
-                    <h3>API 金鑰</h3>
-                    <button id="createKeyBtn" class="small-btn">新增金鑰</button>
-                </div>
-                <div id="apiKeysList" class="api-keys-list">
-                    <p class="empty-data">載入中...</p>
-                </div>
-            </div>
-
-            <!-- 最近活動 -->
-            <div class="panel-card wide">
-                <h3>最近活動</h3>
-                <div id="recentActivity" class="activity-list">
-                    <p class="empty-data">載入中...</p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    </div><!-- .container -->
-    <script src="{{ url_for('static', filename='js/themeManager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/dashboardManager.js') }}"></script>
-</body>
-
-</html>
+                <div id="modeDistribution" cla

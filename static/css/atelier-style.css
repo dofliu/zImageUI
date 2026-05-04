@@ -17,6 +17,21 @@
   --accent:    oklch(0.52 0.12 65);
   --accent-2:  oklch(0.64 0.11 65);
   --err:       oklch(0.55 0.18 25);
+  /* -- at-* 橋接變數（供 avatar.css 使用）-- */
+  --at-topbar-h: 48px;
+  --at-surface: var(--paper-2);
+  --at-surface-2: var(--paper-3);
+  --at-bg: var(--paper);
+  --at-border: var(--rule);
+  --at-text: var(--ink);
+  --at-accent: var(--accent);
+  --at-accent-alpha: oklch(0.52 0.12 65 / 0.12);
+  --at-hover: oklch(0 0 0 / 0.04);
+  --at-ok: #22c55e;
+  --at-err: var(--err);
+  --at-warn: #ca8a04;
+  --at-warn-border: oklch(0.8 0.15 85 / 0.3);
+  --at-warn-alpha: oklch(0.9 0.12 85 / 0.08);
 }
 [data-theme="dark"] {
   --paper:     oklch(0.16 0.008 75);
@@ -29,6 +44,8 @@
   --rule:      oklch(0.3 0.01 75);
   --rule-2:    oklch(0.4 0.01 75);
   --accent:    oklch(0.72 0.13 65);
+  --at-accent-alpha: oklch(0.72 0.13 65 / 0.15);
+  --at-hover: oklch(1 0 0 / 0.05);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -91,6 +108,7 @@ button { font-family: inherit; }
   display: flex; gap: 24px;
   font-size: 13px;
   color: var(--ink-2);
+  flex-shrink: 0;        /* 導覽列不壓縮 */
 }
 .at-nav a {
   cursor: pointer;
@@ -98,6 +116,7 @@ button { font-family: inherit; }
   position: relative;
   text-decoration: none;
   color: inherit;
+  white-space: nowrap;   /* 單一連結文字不換行 */
 }
 .at-nav a:hover { color: var(--ink); }
 .at-nav a.on {
@@ -112,6 +131,7 @@ button { font-family: inherit; }
 .at-spacer { flex: 1; }
 
 .at-model-chip {
+  position: relative;  /* 讓 model-panel 可以相對定位 */
   display: flex; align-items: center;
   padding: 5px 12px;
   border: 1px solid var(--rule);
@@ -119,7 +139,72 @@ button { font-family: inherit; }
   background: var(--paper-2);
   font-size: 12px;
   color: var(--ink-2);
+  cursor: pointer;
+  user-select: none;
+  max-width: 300px;    /* 避免擠壓導覽列 */
+  min-width: 0;
+  /* 不能用 overflow:hidden，會裁切掉絕對定位的下拉面板 */
 }
+.at-model-chip .model-status {
+  overflow: hidden;    /* 文字截斷改在內層做 */
+}
+.at-model-chip .model-status-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+/* 頁面內容區（非 at-app 版型使用，如 dashboard/gallery 等） */
+.at-page-content {
+  padding: 28px;
+  overflow-y: auto;
+}
+
+/* ── Model Panel（下拉選擇面板，所有頁面通用）────────────── */
+.model-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 360px;
+  max-width: min(360px, calc(100vw - 20px));  /* 防止超出視窗 */
+  background: var(--paper, #faf9f6);
+  border: 1px solid var(--rule, #e8e4db);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  z-index: 1000;
+}
+.model-panel-inner { padding: 12px; }
+.model-panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; font-weight: 600; margin-bottom: 10px; opacity: .8;
+}
+.model-group-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
+  opacity: .4; margin: 6px 0 4px;
+}
+.model-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 8px; border-radius: 8px; transition: background .12s;
+}
+.model-row:hover { background: var(--paper-2, rgba(0,0,0,.04)); }
+.model-row.is-active { background: rgba(99,102,241,.08); }
+.model-row-info { flex: 1; min-width: 0; }
+.model-row-name { font-size: 12.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.model-row-desc { font-size: 11px; opacity: .5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.model-row-btn {
+  font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--rule, #e8e4db);
+  background: var(--paper-2, #f2ede6); cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  color: var(--ink, #2c2a26); transition: background .12s;
+}
+.model-row-btn:hover:not(:disabled) { background: var(--ink, #2c2a26); color: var(--paper, #faf9f6); }
+.model-row-btn.active { background: var(--ink, #2c2a26); color: var(--paper, #faf9f6); border-color: transparent; }
+.model-row-btn.needs-key { border-color: #f59e0b; color: #d97706; }
+.model-row-btn:disabled { opacity: .5; cursor: default; }
+.model-provider-badge {
+  font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 600; flex-shrink: 0;
+}
+.model-provider-badge.local { background: rgba(34,197,94,.15); color: #16a34a; }
+.model-provider-badge.cloud { background: rgba(99,102,241,.15); color: #6366f1; }
 .at-model-chip .model-status {
   display: flex; align-items: center; gap: 8px;
 }

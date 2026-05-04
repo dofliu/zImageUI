@@ -14,6 +14,7 @@ from services.model_registry import get_model_registry
 
 # 建立 Flask 應用
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True   # 模板異動不需重啟
 CORS(app)
 
 

@@ -10,38 +10,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/atelier-global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/atelier-style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
-<body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">
-                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                <h1>Z-Image Studio</h1>
-            </div>
-            <nav class="header-nav">
-                <a href="/" class="nav-link">工作室</a>
-                <a href="/gallery" class="nav-link active">作品集</a>
-                <a href="/projects" class="nav-link">專案</a>
-                <a href="/story" class="nav-link">漫畫工作室</a>
-                <a href="/dashboard" class="nav-link">儀表板</a>
-                <a href="/api-docs" class="nav-link">API</a>
-            </nav>
-            <button id="themeToggle" class="theme-toggle-btn" title="切換主題">
-                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
-                    <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                </svg>
-                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </button>
-        </header>
+<body class="atelier">
+        <!-- ══ TOP BAR ══════════════════════════════════════════════ -->
+    <header class="at-topbar">
+        <div class="at-logo">Z—Image<sup>· ATELIER</sup></div>
+        <nav class="at-nav">
+            <a href="/">工作室</a>
+            <a href="/gallery" class="on">作品集</a>
+            <a href="/projects">專案</a>
+            <a href="/avatar">Avatar Studio</a>
+            <a href="/story">漫畫</a>
+            <a href="/dashboard">儀表板</a>
+            <a href="/api-docs">API</a>
+        </nav>
+        <div class="at-spacer"></div>
+    <button id="themeToggle" class="at-icon-btn" title="切換主題">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+    </header>
+    <div class="at-page-content">
 
     <!-- 作品集列表頁 -->
     <div id="galleryListPage" class="gallery-page">
@@ -115,48 +107,4 @@
                     <label>展示佈局</label>
                     <div class="layout-options">
                         <button class="layout-option active" data-layout="masonry">瀑布流</button>
-                        <button class="layout-option" data-layout="grid">網格</button>
-                        <button class="layout-option" data-layout="slideshow">幻燈片</button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>主題風格</label>
-                    <div class="theme-options">
-                        <button class="theme-option active" data-theme="default">預設</button>
-                        <button class="theme-option" data-theme="dark">深色</button>
-                        <button class="theme-option" data-theme="minimal">簡約</button>
-                        <button class="theme-option" data-theme="elegant">典雅</button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="cancelCreateBtn" class="modal-btn cancel-btn">取消</button>
-                <button id="confirmCreateBtn" class="modal-btn confirm-btn">建立</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Lightbox 大圖檢視 -->
-    <div id="lightbox" class="lightbox-overlay" style="display: none;">
-        <button id="lightboxClose" class="lightbox-close">✕</button>
-        <button id="lightboxPrev" class="lightbox-nav lightbox-prev">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="lightbox-content">
-            <img id="lightboxImage" src="" alt="">
-            <div class="lightbox-info">
-                <p id="lightboxCaption" class="lightbox-caption"></p>
-                <p id="lightboxPrompt" class="lightbox-prompt"></p>
-            </div>
-        </div>
-        <button id="lightboxNext" class="lightbox-nav lightbox-next">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-    </div>
-
-    </div><!-- .container -->
-    <script src="{{ url_for('static', filename='js/themeManager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/galleryManager.js') }}"></script>
-</body>
-
-</html>
+                 
