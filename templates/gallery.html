@@ -107,4 +107,45 @@
                     <label>展示佈局</label>
                     <div class="layout-options">
                         <button class="layout-option active" data-layout="masonry">瀑布流</button>
-                 
+                        <button class="layout-option" data-layout="grid">網格</button>
+                        <button class="layout-option" data-layout="slideshow">幻燈片</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>主題風格</label>
+                    <div class="theme-options">
+                        <button class="theme-option active" data-theme="default">預設</button>
+                        <button class="theme-option" data-theme="dark">深色</button>
+                        <button class="theme-option" data-theme="minimal">極簡</button>
+                        <button class="theme-option" data-theme="elegant">典雅</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelCreateBtn" class="modal-btn cancel-btn">取消</button>
+                <button id="confirmCreateBtn" class="modal-btn confirm-btn">建立</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox-overlay" style="display: none;">
+        <button id="lightboxClose" class="lightbox-close">✕</button>
+        <button id="lightboxPrev" class="lightbox-nav lightbox-prev">‹</button>
+        <button id="lightboxNext" class="lightbox-nav lightbox-next">›</button>
+        <div class="lightbox-content">
+            <img id="lightboxImage" src="" alt="">
+            <div class="lightbox-info">
+                <p id="lightboxCaption" class="lightbox-caption"></p>
+                <p id="lightboxPrompt" class="lightbox-prompt"></p>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- /.at-page-content -->
+
+<!-- ── Scripts ───────────────────────────────────────────────── -->
+<script src="{{ url_for('static', filename='js/themeManager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/galleryManager.js') }}"></script>
+</body>
+</html>

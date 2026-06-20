@@ -98,4 +98,55 @@
         </div>
 
         <!-- 專案設定摘要 -->
-        <div id="detailSettings" class="detail-settings" style=
+        <div id="detailSettings" class="detail-settings" style="display: none;">
+            <span id="settingModel" class="detail-setting-tag"></span>
+            <span id="settingStyle" class="detail-setting-tag"></span>
+        </div>
+
+        <!-- 備註 -->
+        <div class="detail-notes-section">
+            <label for="detailNotes">備註</label>
+            <textarea id="detailNotes" class="detail-notes" placeholder="記下這個專案的想法..." rows="3"></textarea>
+        </div>
+
+        <!-- 專案圖片 -->
+        <div id="detailImagesGrid" class="detail-images-grid">
+            <p class="empty-state">這個專案還沒有圖片。</p>
+        </div>
+    </div>
+
+    <!-- 建立專案對話框 -->
+    <div id="createProjectDialog" class="modal-overlay" style="display: none;">
+        <div class="modal-content project-modal">
+            <div class="modal-header">
+                <h2>建立新專案</h2>
+                <button id="closeProjectDialog" class="modal-close-btn">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newProjectName">專案名稱</label>
+                    <input type="text" id="newProjectName" placeholder="例如：AI 風景畫集" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="newProjectDesc">描述 (選填)</label>
+                    <textarea id="newProjectDesc" placeholder="描述專案用途..." rows="3" maxlength="200"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="defaultNegPrompt">預設負面提示詞 (選填)</label>
+                    <textarea id="defaultNegPrompt" placeholder="預設排除的元素..." rows="2" maxlength="500"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelProjectBtn" class="modal-btn cancel-btn">取消</button>
+                <button id="confirmProjectBtn" class="modal-btn confirm-btn">建立</button>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- /.at-page-content -->
+
+<!-- ── Scripts ───────────────────────────────────────────────── -->
+<script src="{{ url_for('static', filename='js/themeManager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/projectManager.js') }}"></script>
+</body>
+</html>
